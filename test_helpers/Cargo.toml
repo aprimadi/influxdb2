@@ -1,0 +1,14 @@
+[package]
+name = "test_helpers"
+version = "0.1.0"
+authors = ["Paul Dix <paul@pauldix.net>"]
+edition = "2018"
+
+[dependencies] # In alphabetical order
+dotenv = "0.15.0"
+opentelemetry = { version = "0.13", default-features = false, features = ["trace", "metrics", "rt-tokio"] }
+parking_lot = "0.11.1"
+tempfile = "3.1.0"
+tracing = { version = "0.1", features = ["max_level_trace", "release_max_level_debug"] }
+tracing-subscriber = { version = "0.2", default-features = false, features = ["env-filter", "smallvec", "chrono", "parking_lot", "registry", "fmt", "ansi", "json"] }
+

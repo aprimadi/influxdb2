@@ -1,0 +1,27 @@
+[package]
+name = "structmap-derive"
+description = "Proc derive macro for structmap crate"
+
+authors = ["Armin Primadi <aprimadi@gmail.com>", "ex0dus-0x <ex0dus@codemuch.tech>"]
+license = "MIT"
+
+version = "0.1.5"
+edition = "2018"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+itertools = "0.10.1"
+proc-macro2 = "1.0.24"
+quote = "1.0"
+regex = "1.5.4"
+syn = { version = "1.0.58", features = ["full", "extra-traits"] }
+
+[dev-dependencies]
+structmap = { path = "../structmap" }
+
+# crates.io dependencies
+chrono = "0.4"
+trybuild = "1.0"
+

@@ -1,0 +1,10 @@
+[package]
+name = "structmap"
+description = "Procedural macro library for converting between Rust structs and associative containers"
+authors = ["Armin Primadi <aprimadi@gmail.com>", "ex0dus-0x <ex0dus@codemuch.tech>"]
+license = "MIT"
+version = "0.1.5"
+edition = "2018"
+
+[dependencies]
+chrono = "0.4"
