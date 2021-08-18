@@ -17,16 +17,27 @@ it in my project.
 ```rust
 use chrono::{DateTime, FixedOffset};
 use influxdb2::Client;
+use influxdb2::models::Query;
+use structmap::FromMap;
 
-#[derive(structmap_derive::FromMap)]
+#[derive(Debug, structmap_derive::FromMap)]
 pub struct StockPrice {
     ticker: String,
     value: f64,
     time: DateTime<FixedOffset>,
 }
 
-#[tokio::main]
-async fn main() {
+impl Default for StockPrice {
+    fn default() -> Self {
+        Self {
+            ticker: "".to_string(),
+            value: 0_f64,
+            time: chrono::MIN_DATETIME.with_timezone(&chrono::FixedOffset::east(7 * 3600)),
+        }
+    }
+}
+
+async fn example() -> Result<(), Box<dyn std::error::Error>> {
     let host = std::env::var("INFLUXDB_HOST").unwrap();
     let org = std::env::var("INFLUXDB_ORG").unwrap();
     let token = std::env::var("INFLUXDB_TOKEN").unwrap();
@@ -36,23 +47,28 @@ async fn main() {
         |> range(start: -1w)
         |> filter(fn: (r) => r.ticker == \"{}\") 
         |> last()
-    ", ticker);
+    ", "AAPL");
     let query = Query::new(qs.to_string());
-    let res: Vec<StockPrice> = self.client.query::<StockPrice>(&self.org, Some(query))
-        .await
-        .unwrap();
-    println!("{}", res);
+    let res: Vec<StockPrice> = client.query::<StockPrice>(Some(query))
+        .await?;
+    println!("{:?}", res);
+
+    Ok(())
 }
 ```
 
 ### Writing
 
 ```rust
-#[tokio::main]
-async fn main() {
+async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    use futures::prelude::*;
+    use influxdb2::models::DataPoint;
+    use influxdb2::Client;
+
     let host = std::env::var("INFLUXDB_HOST").unwrap();
     let org = std::env::var("INFLUXDB_ORG").unwrap();
     let token = std::env::var("INFLUXDB_TOKEN").unwrap();
+    let bucket = "bucket";
     let client = Client::new(host, org, token);
     
     let points = vec![
@@ -68,6 +84,8 @@ async fn main() {
     ];
                                                             
     client.write(bucket, stream::iter(points)).await?;
+    
+    Ok(())
 }
 ```
 
