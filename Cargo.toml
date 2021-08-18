@@ -10,9 +10,9 @@ license = "MIT"
 edition = "2018"
 
 [dependencies] # In alphabetical order
-influxdb_line_protocol = { path = "./influxdb_line_protocol" }
-structmap = { path = "./structmap" }
-structmap-derive = { path = "./structmap-derive" }
+influxdb_line_protocol = { version = "0.1.0", path = "./influxdb_line_protocol" }
+structmap = { version = "0.1.5", path = "./structmap" }
+structmap-derive = { version = "0.1.5", path = "./structmap-derive" }
 
 # crates.io dependencies
 base64 = "0.13"
