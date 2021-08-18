@@ -1,0 +1,14 @@
+[package]
+name = "influxdb_line_protocol"
+version = "0.1.0"
+authors = ["Paul Dix <paul@pauldix.net>"]
+edition = "2018"
+
+[dependencies] # In alphabetical order
+nom = "6"
+smallvec = "1.2.0"
+snafu = "0.6.2"
+tracing = { version = "0.1", features = ["max_level_trace", "release_max_level_debug"] }
+
+[dev-dependencies] # In alphabetical order
+test_helpers = { path = "../test_helpers" }

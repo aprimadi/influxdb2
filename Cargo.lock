@@ -166,26 +166,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ea221b5284a47e40033bf9b66f35f984ec0ea2931eb03505246cd27a963f981b"
 
 [[package]]
-name = "crossbeam-channel"
-version = "0.5.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "06ed27e177f16d65f0f0c22a213e17c696ace5dd64b14258b52f9417ccb52db4"
-dependencies = [
- "cfg-if",
- "crossbeam-utils",
-]
-
-[[package]]
-name = "crossbeam-utils"
-version = "0.8.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d82cfc11ce7f2c3faef78d8a684447b40d503d9681acebed6cb728d45940c4db"
-dependencies = [
- "cfg-if",
- "lazy_static",
-]
-
-[[package]]
 name = "csv"
 version = "1.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -588,12 +568,11 @@ dependencies = [
 [[package]]
 name = "influxdb_line_protocol"
 version = "0.1.0"
-source = "git+https://github.com/influxdata/influxdb_iox#efb091c693e68a09501b493ed1bd9e1e198290c5"
 dependencies = [
  "nom",
- "observability_deps",
  "smallvec",
  "snafu",
+ "tracing",
 ]
 
 [[package]]
@@ -815,15 +794,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "observability_deps"
-version = "0.1.0"
-source = "git+https://github.com/influxdata/influxdb_iox#efb091c693e68a09501b493ed1bd9e1e198290c5"
-dependencies = [
- "opentelemetry 0.15.0",
- "tracing",
-]
-
-[[package]]
 name = "once_cell"
 version = "1.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -872,27 +842,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b91cea1dfd50064e52db033179952d18c770cbc5dfefc8eba45d619357ba3914"
 dependencies = [
  "async-trait",
- "dashmap",
- "fnv",
- "futures",
- "js-sys",
- "lazy_static",
- "percent-encoding",
- "pin-project",
- "rand 0.8.4",
- "thiserror",
- "tokio",
- "tokio-stream",
-]
-
-[[package]]
-name = "opentelemetry"
-version = "0.15.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ff27b33e30432e7b9854936693ca103d8591b0501f7ae9f633de48cda3bf2a67"
-dependencies = [
- "async-trait",
- "crossbeam-channel",
  "dashmap",
  "fnv",
  "futures",
@@ -1413,7 +1362,7 @@ name = "test_helpers"
 version = "0.1.0"
 dependencies = [
  "dotenv",
- "opentelemetry 0.13.0",
+ "opentelemetry",
  "parking_lot",
  "tempfile",
  "tracing",
