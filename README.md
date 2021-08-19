@@ -18,9 +18,9 @@ it in my project.
 use chrono::{DateTime, FixedOffset};
 use influxdb2::Client;
 use influxdb2::models::Query;
-use structmap::FromMap;
+use influxdb2_structmap::FromMap;
 
-#[derive(Debug, structmap_derive::FromMap)]
+#[derive(Debug, influxdb2_structmap_derive::FromMap)]
 pub struct StockPrice {
     ticker: String,
     value: f64,
