@@ -12,10 +12,10 @@ use chrono::DateTime;
 use csv::StringRecord;
 use fallible_iterator::FallibleIterator;
 use go_parse_duration::parse_duration;
+use influxdb2_structmap::{FromMap, GenericMap};
+use influxdb2_structmap::value::Value;
 use reqwest::{Method, StatusCode};
 use snafu::ResultExt;
-use structmap::{FromMap, GenericMap};
-use structmap::value::Value;
 
 use crate::models::{
     AnalyzeQueryResponse, AstResponse, FluxSuggestion, FluxSuggestions, LanguageRequest, Query,
@@ -438,7 +438,7 @@ mod tests {
     use super::*;
     use mockito::{mock, Matcher};
 
-    #[derive(structmap_derive::FromMap)]
+    #[derive(influxdb2_structmap_derive::FromMap)]
     struct Empty { }
     impl Default for Empty {
         fn default() -> Self {

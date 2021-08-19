@@ -547,32 +547,46 @@ dependencies = [
  "bytes",
  "chrono",
  "csv",
+ "dotenv",
  "fallible-iterator",
  "futures",
  "go-parse-duration",
- "influxdb_line_protocol",
+ "influxdb2-structmap",
+ "influxdb2-structmap-derive",
  "mockito",
+ "nom",
  "once_cell",
+ "opentelemetry",
  "parking_lot",
  "reqwest",
  "serde",
  "serde_json",
+ "smallvec",
  "snafu",
- "structmap",
- "structmap-derive",
+ "tempfile",
  "test_helpers",
  "tokio",
+ "tracing",
+ "tracing-subscriber",
  "url",
 ]
 
 [[package]]
-name = "influxdb_line_protocol"
-version = "0.1.0"
+name = "influxdb2-structmap"
+version = "0.1.5"
 dependencies = [
- "nom",
- "smallvec",
- "snafu",
- "tracing",
+ "chrono",
+]
+
+[[package]]
+name = "influxdb2-structmap-derive"
+version = "0.1.5"
+dependencies = [
+ "itertools",
+ "proc-macro2",
+ "quote",
+ "regex",
+ "syn",
 ]
 
 [[package]]
@@ -1307,24 +1321,6 @@ name = "static_assertions"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
-
-[[package]]
-name = "structmap"
-version = "0.1.5"
-dependencies = [
- "chrono",
-]
-
-[[package]]
-name = "structmap-derive"
-version = "0.1.5"
-dependencies = [
- "itertools",
- "proc-macro2",
- "quote",
- "regex",
- "syn",
-]
 
 [[package]]
 name = "syn"

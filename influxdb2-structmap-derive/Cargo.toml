@@ -1,5 +1,5 @@
 [package]
-name = "structmap-derive"
+name = "influxdb2-structmap-derive"
 description = "Proc derive macro for structmap crate"
 
 authors = ["Armin Primadi <aprimadi@gmail.com>", "ex0dus-0x <ex0dus@codemuch.tech>"]
@@ -19,7 +19,7 @@ regex = "1.5.4"
 syn = { version = "1.0.58", features = ["full", "extra-traits"] }
 
 [dev-dependencies]
-structmap = { path = "../structmap" }
+influxdb2-structmap = { path = "../influxdb2-structmap" }
 
 # crates.io dependencies
 chrono = "0.4"

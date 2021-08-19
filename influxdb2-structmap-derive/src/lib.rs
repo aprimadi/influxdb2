@@ -219,8 +219,8 @@ pub fn from_map(input: TokenStream) -> TokenStream {
 
     // start codegen of a generic or non-generic impl for the given struct using quasi-quoting
     let tokens = quote! {
-        use structmap::value::Value;
-        use structmap::{GenericMap};
+        use influxdb2_structmap::value::Value;
+        use influxdb2_structmap::{GenericMap};
 
         impl #impl_generics FromMap for #name #ty_generics #where_clause {
 
