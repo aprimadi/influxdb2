@@ -91,7 +91,7 @@ async fn example() -> Result<(), Box<dyn std::error::Error>> {
 
 ### Delete API
 
-```
+```rust
 let host = "some-host";
 let org = "some-org";
 let token = "some-token";
