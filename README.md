@@ -89,3 +89,16 @@ async fn example() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
+### Delete API
+
+```
+let host = "some-host";
+let org = "some-org";
+let token = "some-token";
+let client = Client::new(host, org, token);
+
+let start = NaiveDate::from_ymd(2020, 1, 1).and_hms(0, 0, 0);
+let stop = NaiveDate::from_ymd(2020, 12, 31).and_hms(23, 59, 59);
+let predicate = Some("_measurement=\"some-measurement\"".to_owned());
+client.delete(bucket, start, stop, predicate).await.unwrap();
+```

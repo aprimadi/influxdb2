@@ -1,6 +1,6 @@
 [package]
 name = "influxdb2"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Armin Primadi <aprimadi@gmail.com>", "Paul Dix <paul@pauldix.net>"]
 keywords = ["influxdb", "influxdb2", "influxdb-client"]
 description = "Influxdb 2 client library for rust"
@@ -16,7 +16,7 @@ influxdb2-structmap-derive = { version = "0.1.5", path = "./influxdb2-structmap-
 # crates.io dependencies
 base64 = "0.13"
 bytes = { version = "1.0", default-features = false }
-chrono = "0.4"
+chrono = { version = "0.4", features = ["serde"] }
 csv = "1.1"
 dotenv = "0.15.0"
 fallible-iterator = "0.2.0"
