@@ -27,6 +27,18 @@ pub fn from_map(input: TokenStream) -> TokenStream {
         .filter_map(|field| field.ident.as_ref())
         .collect::<Vec<&Ident>>();
 
+    // This is struct fields. For example:
+    //
+    // ```
+    // struct StockQuote {
+    //     ticker: String,
+    //     close: f64,
+    //     time: i64,
+    // }
+    // ```
+    //
+    // keys will be ["ticker", "close", "time"]
+    //
     // convert all the field names into strings
     let keys: Vec<String> = idents
         .clone()
@@ -34,18 +46,10 @@ pub fn from_map(input: TokenStream) -> TokenStream {
         .map(|ident| ident.to_string())
         .collect::<Vec<String>>();
 
+    // Typenames: i.e. "String", "f64", "i64"
     let typenames = fields
         .iter()
-        .map(|field| { /*match field.ty.clone() {
-            Type::Path(typepath) => {
-                typepath
-                /*
-                let typename = quote! {#typepath}.to_string();
-                typename
-                */
-            }
-            _ => unimplemented!(),
-            */
+        .map(|field| {
             let t = field.ty.clone();
             let s = quote! {#t}.to_string();
             s
@@ -89,13 +93,13 @@ pub fn from_map(input: TokenStream) -> TokenStream {
                     if !hashmap.contains_key(&key) {
                         key = format!("_{}", key);
                     }
-                    match hashmap.entry(key) {
+                    match hashmap.entry(key.clone()) {
                         ::std::collections::btree_map::Entry::Occupied(entry) => {
                             if let Value::Double(v) = entry.get() {
                                 settings.#ident = *v;
                             }
                         },
-                        _ => panic!("Cannot parse out map entry"),
+                        _ => panic!("Cannot parse out map entry, key: {}", key),
                     }
                 })
             }
@@ -105,13 +109,13 @@ pub fn from_map(input: TokenStream) -> TokenStream {
                     if !hashmap.contains_key(&key) {
                         key = format!("_{}", key);
                     }
-                    match hashmap.entry(key) {
+                    match hashmap.entry(key.clone()) {
                         ::std::collections::btree_map::Entry::Occupied(entry) => {
                             if let Value::Long(v) = entry.get() {
                                 settings.#ident = *v;
                             }
                         },
-                        _ => panic!("Cannot parse out map entry"),
+                        _ => panic!("Cannot parse out map entry, key: {}", key),
                     }
                 })
             }
@@ -121,13 +125,13 @@ pub fn from_map(input: TokenStream) -> TokenStream {
                     if !hashmap.contains_key(&key) {
                         key = format!("_{}", key);
                     }
-                    match hashmap.entry(key) {
+                    match hashmap.entry(key.clone()) {
                         ::std::collections::btree_map::Entry::Occupied(entry) => {
                             if let Value::UnsignedLong(v) = entry.get() {
                                 settings.#ident = *v;
                             }
                         },
-                        _ => panic!("Cannot parse out map entry"),
+                        _ => panic!("Cannot parse out map entry, key: {}", key),
                     }
                 })
             }
@@ -137,13 +141,13 @@ pub fn from_map(input: TokenStream) -> TokenStream {
                     if !hashmap.contains_key(&key) {
                         key = format!("_{}", key);
                     }
-                    match hashmap.entry(key) {
+                    match hashmap.entry(key.clone()) {
                         ::std::collections::btree_map::Entry::Occupied(entry) => {
                             if let Value::Bool(v) = entry.get() {
                                 settings.#ident = *v;
                             }
                         },
-                        _ => panic!("Cannot parse out map entry"),
+                        _ => panic!("Cannot parse out map entry, key: {}", key),
                     }
                 })
             }
@@ -153,13 +157,13 @@ pub fn from_map(input: TokenStream) -> TokenStream {
                     if !hashmap.contains_key(&key) {
                         key = format!("_{}", key);
                     }
-                    match hashmap.entry(key) {
+                    match hashmap.entry(key.clone()) {
                         ::std::collections::btree_map::Entry::Occupied(entry) => {
                             if let Value::String(v) = entry.get() {
                                 settings.#ident = v.clone();
                             }
                         },
-                        _ => panic!("Cannot parse out map entry"),
+                        _ => panic!("Cannot parse out map entry, key: {}", key),
                     }
                 })
             }
@@ -169,13 +173,13 @@ pub fn from_map(input: TokenStream) -> TokenStream {
                     if !hashmap.contains_key(&key) {
                         key = format!("_{}", key);
                     }
-                    match hashmap.entry(key) {
+                    match hashmap.entry(key.clone()) {
                         ::std::collections::btree_map::Entry::Occupied(entry) => {
                             if let Value::Duration(v) = entry.get() {
                                 settings.#ident = *v;
                             }
                         },
-                        _ => panic!("Cannot parse out map entry"),
+                        _ => panic!("Cannot parse out map entry, key: {}", key),
                     }
                 })
             }
@@ -185,13 +189,13 @@ pub fn from_map(input: TokenStream) -> TokenStream {
                     if !hashmap.contains_key(&key) {
                         key = format!("_{}", key);
                     }
-                    match hashmap.entry(key) {
+                    match hashmap.entry(key.clone()) {
                         ::std::collections::btree_map::Entry::Occupied(entry) => {
                             if let Value::TimeRFC(v) = entry.get() {
                                 settings.#ident = *v;
                             }
                         },
-                        _ => panic!("Cannot parse out map entry"),
+                        _ => panic!("Cannot parse out map entry, key: {}", key),
                     }
                 })
             }
@@ -201,13 +205,13 @@ pub fn from_map(input: TokenStream) -> TokenStream {
                     if !hashmap.contains_key(&key) {
                         key = format!("_{}", key);
                     }
-                    match hashmap.entry(key) {
+                    match hashmap.entry(key.clone()) {
                         ::std::collections::btree_map::Entry::Occupied(entry) => {
                             if let Value::Base64Binary(v) = entry.get() {
                                 settings.#ident = *v;
                             }
                         },
-                        _ => panic!("Cannot parse out map entry"),
+                        _ => panic!("Cannot parse out map entry, key: {}", key),
                     }
                 })
             }

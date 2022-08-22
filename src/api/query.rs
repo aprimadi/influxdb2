@@ -2,7 +2,7 @@
 //!
 //! Query InfluxDB using InfluxQL or Flux Query
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashSet};
 use std::str::FromStr;
 
 use crate::{Client, Http, RequestError, ReqwestProcessing, Serializing};
@@ -93,8 +93,45 @@ impl Client {
                 let text = response.text().await.unwrap();
                 let qtr = QueryTableResult::new(&text[..]);
                 let mut r = vec![];
+                let mut prev_value: Option<BTreeMap<String, Value>> = None;
+                let mut values: Option<BTreeMap<String, Value>> = None;
+                // TODO: This feels like a hack, instead I think this should 
+                // be done at the parsing level (i.e. QueryTableResult or 
+                // create a new class that parse combined fields)
                 for res in qtr.iterator() {
-                    r.push(T::from_genericmap(res?.values));
+                    let v = res?.values;
+                    
+                    // If the only differences is `_field`, `_value`, `table`, 
+                    // then this is part of the same data point.
+                    if prev_value.is_some() && 
+                       is_same_data_point(prev_value.as_ref().unwrap(), &v) {
+                        let values = values.as_mut().unwrap();
+
+                        // Set field name -> value
+                        match v.get("_field").unwrap().clone() {
+                            Value::String(field) => {
+                                let value = v.get("_value").unwrap().clone();
+                                values.insert(field.clone(), value);
+                            }
+                            _ => panic!("Field should be string"),
+                        };
+                    } else {
+                        if values.is_some() {
+                            r.push(T::from_genericmap(values.unwrap()));
+                        }
+                        values = Some(v.clone());
+                        match v.get("_field").unwrap().clone() {
+                            Value::String(field) => {
+                                let value = v.get("_value").unwrap().clone();
+                                values.as_mut().unwrap().insert(field.clone(), value.clone());
+                            }
+                            _ => panic!("Field should be string"),
+                        };
+                    }
+                    prev_value = Some(v);
+                }
+                if values.is_some() {
+                    r.push(T::from_genericmap(values.unwrap()));
                 }
                 Ok(r)
             },
@@ -431,6 +468,34 @@ fn parse_value(s: &str, t: DataType, name: &str) -> Result<Value, RequestError> 
             Ok(Value::TimeRFC(t))
         }
     }
+}
+
+// Same data point iff the only differences is `_field`, `_value`, `table`
+fn is_same_data_point(v1: &BTreeMap<String, Value>, v2: &BTreeMap<String, Value>) -> bool {
+    let mut keys1 = HashSet::new();
+    let mut keys2 = HashSet::new();
+    for key in v1.keys() {
+        keys1.insert(key.clone());
+    }
+    for key in v2.keys() {
+        keys2.insert(key.clone());
+    }
+    if keys1 != keys2 {
+        return false;
+    }
+
+    for (key, value1) in v1.iter() {
+        let value2 = v2.get(key).unwrap();
+        match &key[..] {
+            "_field" | "_value" | "table" => { /* skip */ }
+            _ => {
+                if value1 != value2 {
+                    return false;
+                }
+            }
+        }
+    }
+    true
 }
 
 #[cfg(test)]
