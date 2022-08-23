@@ -6,4 +6,5 @@ pub mod label;
 pub mod query;
 pub mod ready;
 pub mod setup;
+pub mod task;
 pub mod write;

@@ -3,3 +3,8 @@
 
 - Add support for multiple fields in the same struct
 
+0.2.1
+=====
+
+- Implement create task API
+
