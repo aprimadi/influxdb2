@@ -5,13 +5,14 @@ use serde::{Deserialize, Serialize};
 use snafu::ResultExt;
 
 use crate::{Client, Http, RequestError, ReqwestProcessing};
+use crate::models::Organizations;
 
 impl Client {
     /// List all organizations.
     pub async fn list_organizations(
         &self,
         request: ListOrganizationRequest,
-    ) -> Result<(), RequestError> {
+    ) -> Result<Organizations, RequestError> {
         let qs = serde_qs::to_string(&request).unwrap();
         let url = match &qs[..] {
             "" => format!("{}/api/v2/orgs", self.url),
@@ -27,10 +28,15 @@ impl Client {
         if !response.status().is_success() {
             let status = response.status();
             let text = response.text().await.context(ReqwestProcessing)?;
-            Http { status, text }.fail()?;
+            let res = Http { status, text }.fail();
+            return res;
         }
         
-        Ok(())
+        let res = response
+            .json::<Organizations>()
+            .await
+            .context(ReqwestProcessing)?;
+        Ok(res)
     }
 }
 
