@@ -3,6 +3,7 @@ pub mod buckets;
 pub mod delete;
 pub mod health;
 pub mod label;
+pub mod organization;
 pub mod query;
 pub mod ready;
 pub mod setup;
