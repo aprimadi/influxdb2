@@ -42,15 +42,22 @@ impl Client {
 
 /// Request for list organization API
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ListOrganizationRequest {
-    descending: Option<bool>,
-    limit: Option<i64>,
-    offset: Option<i64>,
-    org: Option<String>,
+    /// Whether to return results in descending order.
+    pub descending: Option<bool>,
+    /// Number of organizations to return.
+    pub limit: Option<i64>,
+    /// Offset of organization to return from.
+    pub offset: Option<i64>,
+    /// Filter by organization name.
+    pub org: Option<String>,
+    /// Filter by organization ID.
     #[serde(rename = "orgID")]
-    org_id: Option<String>,
+    pub org_id: Option<String>,
+    /// Filter by specific user ID.
     #[serde(rename = "userID")]
-    user_id: Option<String>,
+    pub user_id: Option<String>,
 }
 
 impl ListOrganizationRequest {

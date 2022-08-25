@@ -24,4 +24,5 @@ HEAD
 - Make PostTaskRequest fields public
 - Adding list tasks API
 - Refactor create task API
+- Make ListOrganizationRequest fields public
 
