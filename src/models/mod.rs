@@ -36,5 +36,5 @@ pub use self::health::{HealthCheck, Status};
 pub mod data_point;
 pub use data_point::{DataPoint, FieldValue, WriteDataPoint};
 pub mod task;
-pub use task::{PostTaskRequest, TaskStatusType};
+pub use task::{PostTaskRequest, Task, Tasks, TaskStatusType};
 
