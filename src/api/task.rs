@@ -7,8 +7,7 @@ use crate::{Client, Http, RequestError, ReqwestProcessing, Serializing};
 use crate::models::PostTaskRequest;
 
 impl Client {
-    /// Create a new task in the organization specified by the 16-digit 
-    /// hexadecimal `org_id`.
+    /// Create a new task.
     pub async fn create_task(
         &self,
         request: PostTaskRequest,

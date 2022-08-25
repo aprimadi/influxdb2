@@ -24,15 +24,20 @@ impl ToString for TaskStatusType {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct PostTaskRequest {
-    flux: String,
+    /// Flux query
+    pub flux: String,
+    /// Task description
     #[serde(skip_serializing_if = "Option::is_none")]
-    description: Option<String>,
+    pub description: Option<String>,
+    /// Organization name
     #[serde(skip_serializing_if = "Option::is_none")]
-    org: Option<String>,
+    pub org: Option<String>,
+    /// Organization ID
     #[serde(rename = "orgID")]
-    org_id: String,
+    pub org_id: String,
+    /// Task status
     #[serde(skip_serializing_if = "Option::is_none")]
-    status: Option<TaskStatusType>,
+    pub status: Option<TaskStatusType>,
 }
 
 impl PostTaskRequest {

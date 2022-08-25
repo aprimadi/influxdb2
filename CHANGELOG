@@ -17,3 +17,9 @@
 =====
 
 - Fix list all organization API
+
+HEAD
+====
+
+- Make PostTaskRequest fields public
+
