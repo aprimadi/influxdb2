@@ -18,8 +18,8 @@
 
 - Fix list all organization API
 
-HEAD
-====
+0.2.4
+=====
 
 - Make PostTaskRequest fields public
 - Adding list tasks API
