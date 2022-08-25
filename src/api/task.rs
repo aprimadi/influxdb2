@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use snafu::ResultExt;
 
 use crate::{Client, Http, RequestError, ReqwestProcessing, Serializing};
-use crate::models::{PostTaskRequest, Tasks, TaskStatusType};
+use crate::models::{Tasks, TaskStatusType};
 
 impl Client {
     /// List all tasks.
@@ -42,7 +42,7 @@ impl Client {
     /// Create a new task.
     pub async fn create_task(
         &self,
-        request: PostTaskRequest,
+        request: CreateTaskRequest,
     ) -> Result<(), RequestError> {
         let url = format!("{}/api/v2/tasks", self.url);
         let response = self
@@ -86,5 +86,38 @@ pub struct ListTasksRequest {
     pub type_: Option<TaskStatusType>,
     /// Filter tasks to a specific user ID.
     pub user: Option<String>,
+}
+
+/// Encapsulates task data that is sent on POST via the task API.
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct CreateTaskRequest {
+    /// The flux script to run this task
+    pub flux: String,
+    /// The ID of the organization that owns this task
+    #[serde(rename = "orgID")]
+    pub org_id: String,
+    /// An optional description of the task
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
+    /// The name of the organization that owns this task
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub org: Option<String>,
+    /// Task status
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub status: Option<TaskStatusType>,
+}
+
+impl CreateTaskRequest {
+    /// Returns instance of PostTaskRequest
+    pub fn new(org_id: String, flux: String) -> Self {
+        Self {
+            flux,
+            description: None,
+            org: None,
+            org_id,
+            status: None,
+        }
+    }
 }
 
