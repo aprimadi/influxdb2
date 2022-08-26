@@ -94,15 +94,15 @@ pub struct ListTasksRequest {
 pub struct CreateTaskRequest {
     /// The flux script to run this task
     pub flux: String,
-    /// The ID of the organization that owns this task
-    #[serde(rename = "orgID")]
-    pub org_id: String,
     /// An optional description of the task
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     /// The name of the organization that owns this task
     #[serde(skip_serializing_if = "Option::is_none")]
     pub org: Option<String>,
+    /// The ID of the organization that owns this task
+    #[serde(rename = "orgID", skip_serializing_if = "Option::is_none")]
+    pub org_id: Option<String>,
     /// Task status
     #[serde(skip_serializing_if = "Option::is_none")]
     pub status: Option<TaskStatusType>,
@@ -110,12 +110,12 @@ pub struct CreateTaskRequest {
 
 impl CreateTaskRequest {
     /// Returns instance of PostTaskRequest
-    pub fn new(org_id: String, flux: String) -> Self {
+    pub fn new(flux: String) -> Self {
         Self {
             flux,
             description: None,
             org: None,
-            org_id,
+            org_id: None,
             status: None,
         }
     }
