@@ -7,18 +7,11 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub enum TaskStatusType {
     /// Active task status
+    #[serde(rename = "active")]
     Active,
     /// Inactive task status
+    #[serde(rename = "inactive")]
     Inactive,
-}
-
-impl ToString for TaskStatusType {
-    fn to_string(&self) -> String {
-        match &self {
-            TaskStatusType::Active => "active".to_owned(),
-            TaskStatusType::Inactive => "inactive".to_owned(),
-        }
-    }
 }
 
 /// Task schema
@@ -106,5 +99,18 @@ pub struct Tasks {
     /// List of tasks
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub tasks: Vec<Task>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn serialize_task_status_type() {
+        let v = serde_json::to_string(&TaskStatusType::Active).unwrap();
+        assert_eq!(v, "\"active\"");
+        let v = serde_json::to_string(&TaskStatusType::Inactive).unwrap();
+        assert_eq!(v, "\"inactive\"");
+    }
 }
 

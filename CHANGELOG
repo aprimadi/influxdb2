@@ -30,4 +30,5 @@ HEAD
 ====
 
 - Fix list tasks API url
+- Fix task status type is serialized incorrectly
 
