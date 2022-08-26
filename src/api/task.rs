@@ -15,8 +15,8 @@ impl Client {
     ) -> Result<Tasks, RequestError> {
         let qs = serde_qs::to_string(&request).unwrap();
         let url = match &qs[..] {
-            "" => format!("{}/api/v2/orgs", self.url),
-            _  => format!("{}/api/v2/orgs?{}", self.url, qs),
+            "" => format!("{}/api/v2/tasks", self.url),
+            _  => format!("{}/api/v2/tasks?{}", self.url, qs),
         };
 
         let response = self
