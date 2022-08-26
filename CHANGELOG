@@ -38,3 +38,8 @@
 - org_id is not required on CreateTaskRequest
 - Adding delete task API
 
+HEAD
+====
+
+- Adding list all buckets and delete bucket API
+
