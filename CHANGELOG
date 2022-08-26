@@ -36,4 +36,5 @@ HEAD
 ====
 
 - org_id is not required on CreateTaskRequest
+- Adding delete task API
 

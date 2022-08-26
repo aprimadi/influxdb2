@@ -63,6 +63,22 @@ impl Client {
 
         Ok(())
     }
+
+    /// Delete a task specified by task_id.
+    pub async fn delete_task(&self, task_id: &str) -> Result<(), RequestError> {
+        let url = format!("{}/api/v2/tasks/{}", self.url, task_id);
+        let response = self
+            .request(Method::DELETE, &url)
+            .send()
+            .await
+            .context(ReqwestProcessing)?;
+        if !response.status().is_success() {
+            let status = response.status();
+            let text = response.text().await.context(ReqwestProcessing)?;
+            Http { status, text }.fail()?;
+        }
+        Ok(())
+    }
 }
 
 /// Request for list tasks api
