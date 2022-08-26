@@ -32,8 +32,8 @@
 - Fix list tasks API url
 - Fix task status type is serialized incorrectly
 
-HEAD
-====
+0.2.6
+=====
 
 - org_id is not required on CreateTaskRequest
 - Adding delete task API
