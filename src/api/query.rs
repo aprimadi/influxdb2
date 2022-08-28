@@ -498,34 +498,6 @@ fn parse_value(s: &str, t: DataType, name: &str) -> Result<Value, RequestError> 
     }
 }
 
-// Same data point iff the only differences is `_field`, `_value`, `table`
-fn is_same_data_point(v1: &BTreeMap<String, Value>, v2: &BTreeMap<String, Value>) -> bool {
-    let mut keys1 = HashSet::new();
-    let mut keys2 = HashSet::new();
-    for key in v1.keys() {
-        keys1.insert(key.clone());
-    }
-    for key in v2.keys() {
-        keys2.insert(key.clone());
-    }
-    if keys1 != keys2 {
-        return false;
-    }
-
-    for (key, value1) in v1.iter() {
-        let value2 = v2.get(key).unwrap();
-        match &key[..] {
-            "_field" | "_value" | "table" => { /* skip */ }
-            _ => {
-                if value1 != value2 {
-                    return false;
-                }
-            }
-        }
-    }
-    true
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
