@@ -47,3 +47,4 @@ HEAD
 ====
 
 - Proc macros refactoring, better developer interface
+- Re-export influxdb2_structmap::FromMap trait

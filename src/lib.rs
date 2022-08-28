@@ -199,4 +199,5 @@ pub mod api;
 pub mod models;
 
 // Re-exports
+pub use influxdb2_structmap::FromMap;
 pub use influxdb2_derive::FromDataPoint;
