@@ -1,11 +1,9 @@
 [package]
-name = "influxdb2-structmap-derive"
-description = "Proc derive macro for structmap crate"
-
+name = "influxdb2-derive"
+description = "Proc derive macro for Influxdb"
 authors = ["Armin Primadi <aprimadi@gmail.com>", "ex0dus-0x <ex0dus@codemuch.tech>"]
 license = "MIT"
-
-version = "0.1.5"
+version = "0.1.0"
 edition = "2018"
 
 [lib]

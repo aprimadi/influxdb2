@@ -26,6 +26,27 @@ impl Default for StockPrice {
     }
 }
 
+
+#[derive(Debug, FromDataPoint)]
+pub struct RealtimeStockPrice {
+   ticker: String,
+   value: f64,
+   open: f64,
+   time: DateTime<FixedOffset>,
+}
+
+impl Default for RealtimeStockPrice {
+    fn default() -> Self {
+        let now = Utc::now().naive_utc();
+        Self {
+            ticker: "".to_owned(),
+            value: 0.0,
+            open: 0.0,
+            time: FixedOffset::east(7 * 3600).from_utc_datetime(&now),
+        }
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let host    = env::var("INFLUXDB_HOST").unwrap();

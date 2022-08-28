@@ -10,8 +10,8 @@ license = "MIT"
 edition = "2018"
 
 [dependencies] # In alphabetical order
-influxdb2-structmap = { version = "0.1.5", path = "./influxdb2-structmap" }
-influxdb2-structmap-derive = { version = "0.1.5", path = "./influxdb2-structmap-derive" }
+influxdb2-structmap = { path = "./influxdb2-structmap" }
+influxdb2-derive = { path = "./influxdb2-derive" }
 
 # crates.io dependencies
 base64 = "0.13"

@@ -16,11 +16,10 @@ it in my project.
 
 ```rust
 use chrono::{DateTime, FixedOffset};
-use influxdb2::Client;
+use influxdb2::{Client, FromDataPoint};
 use influxdb2::models::Query;
-use influxdb2_structmap::FromMap;
 
-#[derive(Debug, influxdb2_structmap_derive::FromMap)]
+#[derive(Debug, FromDataPoint)]
 pub struct StockPrice {
     ticker: String,
     value: f64,
@@ -89,16 +88,19 @@ async fn example() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
-### Delete API
+## Features
 
-```rust
-let host = "some-host";
-let org = "some-org";
-let token = "some-token";
-let client = Client::new(host, org, token);
+Implemented API
 
-let start = NaiveDate::from_ymd(2020, 1, 1).and_hms(0, 0, 0);
-let stop = NaiveDate::from_ymd(2020, 12, 31).and_hms(23, 59, 59);
-let predicate = Some("_measurement=\"some-measurement\"".to_owned());
-client.delete(bucket, start, stop, predicate).await.unwrap();
-```
+- [x] Query API
+- [x] Write API
+- [x] Delete API
+- [ ] Bucket API (partial: only list, create, delete)
+- [ ] Organization API (partial: only list)
+- [ ] Task API (partial: only list, create, delete)
+
+## Development Status
+
+This project is still at alpha status and all the bugs haven't been ironed 
+yet. We used it though in our production code. With that said, use it at your
+own risk and feel free to create an issue request.

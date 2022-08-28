@@ -13,8 +13,8 @@ use syn::{Data, DeriveInput, Ident};
 /// attributes and values of a struct. It will consume a tokenized version of 
 /// the initial struct declaration, and use code generation to implement the 
 /// `FromMap` trait for instantiating the contents of the struct.
-#[proc_macro_derive(FromMap)]
-pub fn from_map(input: TokenStream) -> TokenStream {
+#[proc_macro_derive(FromDataPoint )]
+pub fn from_data_point(input: TokenStream) -> TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
 
     // parse out all the field names in the struct as `Ident`s
@@ -56,27 +56,6 @@ pub fn from_map(input: TokenStream) -> TokenStream {
         })
         .collect::<Vec<String>>();
 
-    // parse out all the primitive types in the struct as Idents
-    /*
-    let typecalls: Vec<Ident> = fields
-        .iter()
-        .map(|field| match field.ty.clone() {
-            Type::Path(typepath) => {
-                // TODO: options and results
-                // TODO: vecs
-                // TODO: genericized numerics
-
-                // get the type of the specified field, lowercase
-                let typename: String = quote! {#typepath}.to_string().to_lowercase();
-
-                // initialize new Ident for codegen
-                Ident::new(&typename, Span::mixed_site())
-            }
-            _ => unimplemented!(),
-        })
-        .collect::<Vec<Ident>>();
-    */
-
     // get the name identifier of the struct input AST
     let name: &Ident = &ast.ident;
     let (impl_generics, ty_generics, where_clause) = ast.generics.split_for_impl();
@@ -95,7 +74,7 @@ pub fn from_map(input: TokenStream) -> TokenStream {
                     }
                     match hashmap.entry(key.clone()) {
                         ::std::collections::btree_map::Entry::Occupied(entry) => {
-                            if let Value::Double(v) = entry.get() {
+                            if let influxdb2_structmap::value::Value::Double(v) = entry.get() {
                                 settings.#ident = *v;
                             }
                         },
@@ -111,7 +90,7 @@ pub fn from_map(input: TokenStream) -> TokenStream {
                     }
                     match hashmap.entry(key.clone()) {
                         ::std::collections::btree_map::Entry::Occupied(entry) => {
-                            if let Value::Long(v) = entry.get() {
+                            if let influxdb2_structmap::value::Value::Long(v) = entry.get() {
                                 settings.#ident = *v;
                             }
                         },
@@ -127,7 +106,7 @@ pub fn from_map(input: TokenStream) -> TokenStream {
                     }
                     match hashmap.entry(key.clone()) {
                         ::std::collections::btree_map::Entry::Occupied(entry) => {
-                            if let Value::UnsignedLong(v) = entry.get() {
+                            if let influxdb2_structmap::value::Value::UnsignedLong(v) = entry.get() {
                                 settings.#ident = *v;
                             }
                         },
@@ -143,7 +122,7 @@ pub fn from_map(input: TokenStream) -> TokenStream {
                     }
                     match hashmap.entry(key.clone()) {
                         ::std::collections::btree_map::Entry::Occupied(entry) => {
-                            if let Value::Bool(v) = entry.get() {
+                            if let influxdb2_structmap::value::Value::Bool(v) = entry.get() {
                                 settings.#ident = *v;
                             }
                         },
@@ -159,7 +138,7 @@ pub fn from_map(input: TokenStream) -> TokenStream {
                     }
                     match hashmap.entry(key.clone()) {
                         ::std::collections::btree_map::Entry::Occupied(entry) => {
-                            if let Value::String(v) = entry.get() {
+                            if let influxdb2_structmap::value::Value::String(v) = entry.get() {
                                 settings.#ident = v.clone();
                             }
                         },
@@ -175,7 +154,7 @@ pub fn from_map(input: TokenStream) -> TokenStream {
                     }
                     match hashmap.entry(key.clone()) {
                         ::std::collections::btree_map::Entry::Occupied(entry) => {
-                            if let Value::Duration(v) = entry.get() {
+                            if let influxdb2_structmap::value::Value::Duration(v) = entry.get() {
                                 settings.#ident = *v;
                             }
                         },
@@ -191,7 +170,7 @@ pub fn from_map(input: TokenStream) -> TokenStream {
                     }
                     match hashmap.entry(key.clone()) {
                         ::std::collections::btree_map::Entry::Occupied(entry) => {
-                            if let Value::TimeRFC(v) = entry.get() {
+                            if let influxdb2_structmap::value::Value::TimeRFC(v) = entry.get() {
                                 settings.#ident = *v;
                             }
                         },
@@ -207,7 +186,7 @@ pub fn from_map(input: TokenStream) -> TokenStream {
                     }
                     match hashmap.entry(key.clone()) {
                         ::std::collections::btree_map::Entry::Occupied(entry) => {
-                            if let Value::Base64Binary(v) = entry.get() {
+                            if let influxdb2_structmap::value::Value::Base64Binary(v) = entry.get() {
                                 settings.#ident = *v;
                             }
                         },
@@ -223,12 +202,9 @@ pub fn from_map(input: TokenStream) -> TokenStream {
 
     // start codegen of a generic or non-generic impl for the given struct using quasi-quoting
     let tokens = quote! {
-        use influxdb2_structmap::value::Value;
-        use influxdb2_structmap::{GenericMap};
+        impl #impl_generics influxdb2_structmap::FromMap for #name #ty_generics #where_clause {
 
-        impl #impl_generics FromMap for #name #ty_generics #where_clause {
-
-            fn from_genericmap(mut hashmap: GenericMap) -> #name {
+            fn from_genericmap(mut hashmap: influxdb2_structmap::GenericMap) -> #name {
                 let mut settings = #name::default();
 
                 #(
@@ -249,6 +225,7 @@ mod tests {
     fn ui() {
         let t = trybuild::TestCases::new();
         t.pass("tests/struct.rs");
+        t.pass("tests/multistruct.rs");
     }
 }
 

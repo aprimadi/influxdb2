@@ -1,6 +1,6 @@
-use influxdb2_structmap::FromMap;
+use influxdb2_structmap_derive::FromMap;
 
-#[derive(influxdb2_structmap_derive::FromMap)]
+#[derive(FromMap)]
 struct StockPrice {
     ticker: String,
     price:  u64,

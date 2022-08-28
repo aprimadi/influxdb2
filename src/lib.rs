@@ -27,11 +27,10 @@
 //! 
 //! ```rust
 //! use chrono::{DateTime, FixedOffset};
-//! use influxdb2::Client;
+//! use influxdb2::{Client, FromDataPoint};
 //! use influxdb2::models::Query;
-//! use influxdb2_structmap::FromMap;
 //! 
-//! #[derive(Debug, influxdb2_structmap_derive::FromMap)]
+//! #[derive(Debug, FromDataPoint)]
 //! pub struct StockPrice {
 //!     ticker: String,
 //!     value: f64,
@@ -199,3 +198,5 @@ pub mod common;
 pub mod api;
 pub mod models;
 
+// Re-exports
+pub use influxdb2_derive::FromDataPoint;

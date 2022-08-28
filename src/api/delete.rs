@@ -8,6 +8,22 @@ use crate::{Client, Http, RequestError, ReqwestProcessing};
 
 impl Client {
     /// Delete data points from a bucket matching specified parameters.
+    ///
+    /// Usage:
+    ///
+    /// ```
+    /// use chrono::NaiveDate;
+    /// use influxdb2::Client;
+    ///
+    /// async fn foo() {
+    ///     let client = Client::new("some-host", "some-org", "some-token");
+    ///     let start = NaiveDate::from_ymd(2020, 1, 1).and_hms(0, 0, 0);
+    ///     let stop = NaiveDate::from_ymd(2020, 12, 31).and_hms(23, 59, 59);
+    ///     let predicate = Some("_measurement=\"some-measurement\"".to_owned());
+    ///     client.delete("some-bucket", start, stop, predicate).await.unwrap();
+    /// }
+    /// ```
+    ///
     pub async fn delete(
         &self,
         bucket: &str,

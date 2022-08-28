@@ -501,9 +501,10 @@ fn is_same_data_point(v1: &BTreeMap<String, Value>, v2: &BTreeMap<String, Value>
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::FromDataPoint;
     use mockito::{mock, Matcher};
 
-    #[derive(influxdb2_structmap_derive::FromMap)]
+    #[derive(FromDataPoint)]
     struct Empty { }
     impl Default for Empty {
         fn default() -> Self {

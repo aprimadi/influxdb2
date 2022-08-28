@@ -1,5 +1,5 @@
+use influxdb2::FromDataPoint;
 use influxdb2::models::{LanguageRequest, Query};
-use influxdb2_structmap::FromMap;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -11,7 +11,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     client.query_suggestions().await?;
     client.query_suggestions_name("some-name").await?;
 
-    #[derive(influxdb2_structmap_derive::FromMap)]
+    #[derive(FromDataPoint)]
     struct Measurement {
         value: f64,
     }

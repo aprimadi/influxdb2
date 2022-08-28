@@ -552,8 +552,8 @@ dependencies = [
  "fallible-iterator",
  "futures",
  "go-parse-duration",
+ "influxdb2-derive",
  "influxdb2-structmap",
- "influxdb2-structmap-derive",
  "mockito",
  "nom",
  "once_cell",
@@ -574,21 +574,21 @@ dependencies = [
 ]
 
 [[package]]
-name = "influxdb2-structmap"
-version = "0.1.5"
-dependencies = [
- "chrono",
-]
-
-[[package]]
-name = "influxdb2-structmap-derive"
-version = "0.1.5"
+name = "influxdb2-derive"
+version = "0.1.0"
 dependencies = [
  "itertools",
  "proc-macro2",
  "quote",
  "regex",
  "syn",
+]
+
+[[package]]
+name = "influxdb2-structmap"
+version = "0.1.5"
+dependencies = [
+ "chrono",
 ]
 
 [[package]]
