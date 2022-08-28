@@ -43,8 +43,9 @@
 
 - Adding list all buckets and delete bucket API
 
-HEAD
-====
+0.3.0
+=====
 
+- Fix non-working multi field support
 - Proc macros refactoring, better developer interface
-- Re-export influxdb2_structmap::FromMap trait
+

@@ -2,14 +2,16 @@ use std::any::Any;
 use std::fmt;
 
 use chrono::{DateTime, FixedOffset};
+use num_traits::cast::ToPrimitive;
+use ordered_float::OrderedFloat;
 
 /// Represents primitive types that are supported for conversion into a BTreeMap that can support
 /// heterogeneous values. Inspired by `serde_json::Value`s.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub enum Value {
     Unknown,
     String(String),
-    Double(f64),
+    Double(OrderedFloat<f64>),
     Bool(bool),
     Long(i64),
     UnsignedLong(u64),
@@ -30,7 +32,7 @@ impl Value {
     pub fn new<T: Any>(value: T) -> Value {
         let any_val = &value as &dyn Any;
         if let Some(val) = any_val.downcast_ref::<f64>() {
-            Value::Double(*val)
+            Value::Double(OrderedFloat::from(*val))
         } else if let Some(val) = any_val.downcast_ref::<bool>() {
             Value::Bool(*val)
         } else if let Some(val) = any_val.downcast_ref::<i64>() {
@@ -80,7 +82,7 @@ impl Value {
 
     pub fn f64(&self) -> Option<f64> {
         if let Value::Double(val) = self {
-            Some(*val)
+            val.to_f64()
         } else {
             None
         }

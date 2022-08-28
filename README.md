@@ -10,6 +10,16 @@ At the time of this writing, the query functionality of the influxdb2 client
 from the official repository isn't working. So, I created this client to use 
 it in my project.
 
+## Setup
+
+Add this to `cargo.toml`:
+
+```
+influxdb2 = "0.3"
+influxdb2-structmap = "0.2"
+num-traits = "0.2"
+```
+
 ## Usage
 
 ### Querying

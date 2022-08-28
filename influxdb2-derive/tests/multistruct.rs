@@ -1,6 +1,6 @@
-use influxdb2_structmap_derive::FromMap;
+use influxdb2_derive::FromDataPoint;
 
-#[derive(FromMap)]
+#[derive(FromDataPoint)]
 struct StockPrice {
     ticker: String,
     price:  u64,
@@ -17,7 +17,7 @@ impl Default for StockPrice {
     }
 }
 
-#[derive(FromMap)]
+#[derive(FromDataPoint)]
 struct RoomTemperature {
     room_name: String,
     temperature: f64,
@@ -35,3 +35,4 @@ impl Default for RoomTemperature {
 }
 
 fn main() {}
+

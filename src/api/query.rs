@@ -2,7 +2,7 @@
 //!
 //! Query InfluxDB using InfluxQL or Flux Query
 
-use std::collections::{BTreeMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::str::FromStr;
 
 use crate::{Client, Http, RequestError, ReqwestProcessing, Serializing};
@@ -14,6 +14,7 @@ use fallible_iterator::FallibleIterator;
 use go_parse_duration::parse_duration;
 use influxdb2_structmap::{FromMap, GenericMap};
 use influxdb2_structmap::value::Value;
+use ordered_float::OrderedFloat;
 use reqwest::{Method, StatusCode};
 use snafu::ResultExt;
 
@@ -86,54 +87,17 @@ impl Client {
             .send()
             .await
             .context(ReqwestProcessing)?;
-        
 
         match response.status() {
             StatusCode::OK => {
                 let text = response.text().await.unwrap();
                 let qtr = QueryTableResult::new(&text[..]);
-                let mut r = vec![];
-                let mut prev_value: Option<BTreeMap<String, Value>> = None;
-                let mut values: Option<BTreeMap<String, Value>> = None;
-                // TODO: This feels like a hack, instead I think this should 
-                // be done at the parsing level (i.e. QueryTableResult or 
-                // create a new class that parse combined fields)
-                for res in qtr.iterator() {
-                    let v = res?.values;
-                    
-                    // If the only differences is `_field`, `_value`, `table`, 
-                    // then this is part of the same data point.
-                    if prev_value.is_some() && 
-                       is_same_data_point(prev_value.as_ref().unwrap(), &v) {
-                        let values = values.as_mut().unwrap();
-
-                        // Set field name -> value
-                        match v.get("_field").unwrap().clone() {
-                            Value::String(field) => {
-                                let value = v.get("_value").unwrap().clone();
-                                values.insert(field.clone(), value);
-                            }
-                            _ => panic!("Field should be string"),
-                        };
-                    } else {
-                        if values.is_some() {
-                            r.push(T::from_genericmap(values.unwrap()));
-                        }
-                        values = Some(v.clone());
-                        match v.get("_field").unwrap().clone() {
-                            Value::String(field) => {
-                                let value = v.get("_value").unwrap().clone();
-                                values.as_mut().unwrap().insert(field.clone(), value.clone());
-                            }
-                            _ => panic!("Field should be string"),
-                        };
-                    }
-                    prev_value = Some(v);
+                let qr = QueryResult::new(qtr)?;
+                let mut res = vec![];
+                for item in qr.items {
+                    res.push(T::from_genericmap(item));
                 }
-                if values.is_some() {
-                    r.push(T::from_genericmap(values.unwrap()));
-                }
-                Ok(r)
+                Ok(res)
             },
             status => {
                 let text = response.text().await.context(ReqwestProcessing)?;
@@ -427,6 +391,70 @@ impl<'a> FallibleIterator for QueryTableResult<'a> {
     }
 }
 
+struct QueryResult {
+    items: Vec<GenericMap>,
+}
+
+impl QueryResult {
+    fn new<'a>(qtr: QueryTableResult<'a>) -> Result<Self, RequestError> {
+        // Parse items
+        let mut items = vec![];
+        let mut build_table = HashMap::<GenericMap, GenericMap>::new();
+        let blacklist = vec![
+            "_field".to_owned(),
+            "_value".to_owned(),
+            "table".to_owned(),
+        ];
+        let blacklist: HashSet<String> = blacklist.into_iter().collect();
+        let mut key_order: Vec<GenericMap> = vec![];
+        for record in qtr.iterator() {
+            let mut map = record?.values;
+            
+            let mut key = map.clone();
+            key.retain(|k, _| !blacklist.contains(k));
+
+            match build_table.get_mut(&key) {
+                Some(entry) => {
+                    // Set field value
+                    let field;
+                    if let Value::String(f) = map.get("_field").unwrap() {
+                        field = f.clone();
+                    } else {
+                        panic!("");
+                    }
+                    let value = map.get("_value").unwrap();
+                    entry.insert(field, value.clone());
+                }
+                None => {
+                    // Set field value
+                    let field;
+                    if let Value::String(f) = map.get("_field").unwrap() {
+                        field = f.clone();
+                    } else {
+                        panic!("");
+                    }
+                    let value = map.get("_value").unwrap();
+                    map.insert(field, value.clone());
+
+                    build_table.insert(key.clone(), map);
+                    key_order.push(key);
+                }
+            }
+        }
+
+        // Build items based on the order the `key` is inserted
+        for key in key_order {
+            let entry = build_table.get(&key).unwrap();
+            items.push(entry.clone());
+        }
+
+        let res = Self {
+            items,
+        };
+        Ok(res)
+    }
+}
+
 fn parse_value(s: &str, t: DataType, name: &str) -> Result<Value, RequestError> {
     match t {
         DataType::String => {
@@ -434,7 +462,7 @@ fn parse_value(s: &str, t: DataType, name: &str) -> Result<Value, RequestError> 
         }
         DataType::Double => {
             let v = s.parse::<f64>().unwrap();
-            Ok(Value::Double(v))
+            Ok(Value::Double(OrderedFloat::from(v)))
         }
         DataType::Bool => {
             if s.to_lowercase() == "false" {
@@ -705,7 +733,7 @@ mod tests {
                     (String::from("_time"), parse_value("2020-02-18T10:34:08.135814545Z", DataType::TimeRFC, "_time").unwrap()),
                     (String::from("_field"), Value::String(String::from("f"))),
                     (String::from("_measurement"), Value::String(String::from("test"))),
-                    (String::from("_value"), Value::Double(1.4)),
+                    (String::from("_value"), Value::Double(OrderedFloat::from(1.4))),
                     (String::from("a"), Value::String(String::from("1"))),
                     (String::from("b"), Value::String(String::from("adsfasdf"))),
                 ].iter().cloned().collect(),
@@ -720,7 +748,7 @@ mod tests {
                     (String::from("_time"), parse_value("2020-02-18T22:08:44.850214724Z", DataType::TimeRFC, "_time").unwrap()),
                     (String::from("_field"), Value::String(String::from("f"))),
                     (String::from("_measurement"), Value::String(String::from("test"))),
-                    (String::from("_value"), Value::Double(6.6)),
+                    (String::from("_value"), Value::Double(OrderedFloat::from(6.6))),
                     (String::from("a"), Value::String(String::from("1"))),
                     (String::from("b"), Value::String(String::from("adsfasdf"))),
                 ].iter().cloned().collect(),

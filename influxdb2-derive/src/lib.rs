@@ -75,7 +75,7 @@ pub fn from_data_point(input: TokenStream) -> TokenStream {
                     match hashmap.entry(key.clone()) {
                         ::std::collections::btree_map::Entry::Occupied(entry) => {
                             if let influxdb2_structmap::value::Value::Double(v) = entry.get() {
-                                settings.#ident = *v;
+                                settings.#ident = (v as &::num_traits::cast::ToPrimitive).to_f64().unwrap();
                             }
                         },
                         _ => panic!("Cannot parse out map entry, key: {}", key),

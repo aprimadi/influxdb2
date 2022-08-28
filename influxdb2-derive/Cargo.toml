@@ -21,5 +21,6 @@ influxdb2-structmap = { path = "../influxdb2-structmap" }
 
 # crates.io dependencies
 chrono = "0.4"
+num-traits = "0.2"
 trybuild = "1.0"
 

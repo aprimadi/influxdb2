@@ -52,7 +52,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     client.write(&bucket, stream::iter(points)).await?;
     let qs = format!("from(bucket: \"{}\") 
       |> range(start: -1w)
-      |> last()
    ", bucket);
     let query = Query::new(qs.to_string());
 
