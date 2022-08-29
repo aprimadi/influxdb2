@@ -98,6 +98,23 @@ async fn example() -> Result<(), Box<dyn std::error::Error>> {
 }
 ```
 
+## Supported Data Types
+
+InfluxDB data point doesn't support every data types supported by Rust. So,
+the derive macro only allows for a subset of data types which is also 
+supported in InfluxDB. 
+
+Supported struct field types:
+
+- bool
+- f64
+- i64
+- u64 - DEPRECATED, will be removed in version 0.4
+- String
+- Vec<u8>
+- chrono::Duration
+- DateTime<FixedOffset>
+
 ## Features
 
 Implemented API
@@ -112,5 +129,6 @@ Implemented API
 ## Development Status
 
 This project is still at alpha status and all the bugs haven't been ironed 
-yet. We used it though in our production code. With that said, use it at your
-own risk and feel free to create an issue request.
+yet. With that said, use it at your own risk and feel free to create an issue 
+or pull request.
+
