@@ -14,10 +14,23 @@ it in my project.
 
 Add this to `cargo.toml`:
 
-```
+```toml
 influxdb2 = "0.3"
 influxdb2-structmap = "0.2"
 num-traits = "0.2"
+```
+
+## TLS Implementations
+This crate uses [reqwest](https://github.com/seanmonstar/reqwest) under the hood.
+You can choose between `native-tls` and `rustls` with the features provided with this crate.
+`native-tls` is chosen as the default, like reqwest does.
+
+```toml
+# Usage for native-tls (the default).
+influxdb2 = "0.3"
+
+# Usage for rustls.
+influxdb2 = { version = "0.3", features = ["rustls"], default-features = false }
 ```
 
 ## Usage
