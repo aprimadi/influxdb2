@@ -91,7 +91,7 @@ impl DataPointBuilder {
 // to be `Vec<u8>` instead, the API for creating a `DataPoint` would need some more consideration,
 // and there would need to be more `Write*` trait implementations. Because the `Write*` traits work
 // on a writer of bytes, that part of the design supports non-UTF-8 data now.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct DataPoint {
     measurement: String,
     tags: BTreeMap<String, String>,
