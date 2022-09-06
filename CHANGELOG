@@ -49,3 +49,8 @@
 - Fix non-working multi field support
 - Proc macros refactoring, better developer interface
 
+0.3.1
+=====
+
+- DataPoint now implements clone
+
