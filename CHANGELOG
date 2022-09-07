@@ -54,3 +54,8 @@
 
 - DataPoint now implements clone
 
+0.3.2
+=====
+
+- Add support for rustls
+
