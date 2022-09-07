@@ -4,12 +4,6 @@ This is a Rust client to InfluxDB using the [2.0 API][2api].
 
 [2api]: https://v2.docs.influxdata.com/v2.0/reference/api/
 
-This project is a fork from the 
-https://github.com/influxdata/influxdb_iox/tree/main/influxdb2_client project.
-At the time of this writing, the query functionality of the influxdb2 client 
-from the official repository isn't working. So, I created this client to use 
-it in my project.
-
 ## Setup
 
 Add this to `cargo.toml`:
@@ -18,19 +12,6 @@ Add this to `cargo.toml`:
 influxdb2 = "0.3"
 influxdb2-structmap = "0.2"
 num-traits = "0.2"
-```
-
-## TLS Implementations
-This crate uses [reqwest](https://github.com/seanmonstar/reqwest) under the hood.
-You can choose between `native-tls` and `rustls` with the features provided with this crate.
-`native-tls` is chosen as the default, like reqwest does.
-
-```toml
-# Usage for native-tls (the default).
-influxdb2 = "0.3"
-
-# Usage for rustls.
-influxdb2 = { version = "0.3", features = ["rustls"], default-features = false }
 ```
 
 ## Usage
@@ -138,6 +119,19 @@ Implemented API
 - [ ] Bucket API (partial: only list, create, delete)
 - [ ] Organization API (partial: only list)
 - [ ] Task API (partial: only list, create, delete)
+
+## TLS Implementations
+This crate uses [reqwest](https://github.com/seanmonstar/reqwest) under the hood.
+You can choose between `native-tls` and `rustls` with the features provided with this crate.
+`native-tls` is chosen as the default, like reqwest does.
+
+```toml
+# Usage for native-tls (the default).
+influxdb2 = "0.3"
+
+# Usage for rustls.
+influxdb2 = { version = "0.3", features = ["rustls"], default-features = false }
+```
 
 ## Development Status
 
