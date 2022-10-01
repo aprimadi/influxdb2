@@ -4,7 +4,7 @@ use crate::models::WriteDataPoint;
 use crate::{Client, Http, RequestError, ReqwestProcessing};
 use bytes::BufMut;
 use futures::{Stream, StreamExt};
-use reqwest::{Body, Method};
+use reqwest::{Body, Method, StatusCode};
 use snafu::ResultExt;
 use std::io::{self, Write};
 
@@ -27,7 +27,7 @@ impl Client {
             .await
             .context(ReqwestProcessing)?;
 
-        if !response.status().is_success() {
+        if response.status() != StatusCode::NO_CONTENT {
             let status = response.status();
             let text = response.text().await.context(ReqwestProcessing)?;
             Http { status, text }.fail()?;
@@ -82,6 +82,7 @@ cpu,host=server01 usage=0.5
 cpu,host=server01,region=us-west usage=0.87
 ",
         )
+        .with_status(204)
         .create();
 
         let client = Client::new(&mockito::server_url(), org, token);
@@ -105,8 +106,41 @@ cpu,host=server01,region=us-west usage=0.87
         // when we assert on mock_server. The error messages that Mockito
         // provides are much clearer for explaining why a test failed than just
         // that the server returned 501, so don't use `?` here.
-        let _result = client.write(bucket, stream::iter(points)).await;
-
+        let result = client.write(bucket, stream::iter(points)).await;
         mock_server.assert();
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    async fn status_code_correctly_interpreted() {
+        let org = "org";
+        let token = "token";
+        let bucket = "bucket";
+
+        let make_mock_server = |status| {
+            mock(
+                "POST",
+                format!("/api/v2/write?bucket={}&org={}", bucket, org).as_str(),
+            )
+            .with_status(status)
+            .create()
+        };
+
+        let write_with_status = |status| async move {
+            let mock_server = make_mock_server(status);
+            let client = Client::new(&mockito::server_url(), org, token);
+            let points: Vec<DataPoint> = vec![];
+            let res = client.write(bucket, stream::iter(points)).await;
+            mock_server.assert();
+            res
+        };
+
+        // success status
+        assert!(write_with_status(204).await.is_ok());
+
+        // failing status
+        for status in [200, 201, 400, 401, 404, 413, 429, 500, 503] {
+            assert!(write_with_status(status).await.is_err());
+        }
     }
 }
