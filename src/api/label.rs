@@ -18,7 +18,7 @@ impl Client {
     }
 
     async fn get_labels(&self, org_id: Option<&str>) -> Result<LabelsResponse, RequestError> {
-        let labels_url = format!("{}/api/v2/labels", self.url);
+        let labels_url = self.url("/api/v2/labels");
         let mut request = self.request(Method::GET, &labels_url);
 
         if let Some(id) = org_id {
@@ -40,7 +40,7 @@ impl Client {
 
     /// Retrieve a label by ID
     pub async fn find_label(&self, label_id: &str) -> Result<LabelResponse, RequestError> {
-        let labels_by_id_url = format!("{}/api/v2/labels/{}", self.url, label_id);
+        let labels_by_id_url = self.url(&format!("/api/v2/labels/{}", label_id));
         let response = self
             .request(Method::GET, &labels_by_id_url)
             .send()
@@ -65,7 +65,7 @@ impl Client {
         name: &str,
         properties: Option<HashMap<String, String>>,
     ) -> Result<LabelResponse, RequestError> {
-        let create_label_url = format!("{}/api/v2/labels", self.url);
+        let create_label_url = self.url("/api/v2/labels");
         let body = LabelCreateRequest {
             org_id: org_id.into(),
             name: name.into(),
@@ -96,7 +96,7 @@ impl Client {
         properties: Option<HashMap<String, String>>,
         label_id: &str,
     ) -> Result<LabelResponse, RequestError> {
-        let update_label_url = format!("{}/api/v2/labels/{}", &self.url, label_id);
+        let update_label_url = self.url(&format!("/api/v2/labels/{}", label_id));
         let body = LabelUpdate { name, properties };
         let response = self
             .request(Method::PATCH, &update_label_url)
@@ -118,7 +118,7 @@ impl Client {
 
     /// Delete a Label
     pub async fn delete_label(&self, label_id: &str) -> Result<(), RequestError> {
-        let delete_label_url = format!("{}/api/v2/labels/{}", &self.url, label_id);
+        let delete_label_url  = self.url(&format!("/api/v2/labels/{}", label_id));
         let response = self
             .request(Method::DELETE, &delete_label_url)
             .send()

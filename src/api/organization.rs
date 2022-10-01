@@ -14,10 +14,12 @@ impl Client {
         request: ListOrganizationRequest,
     ) -> Result<Organizations, RequestError> {
         let qs = serde_qs::to_string(&request).unwrap();
-        let url = match &qs[..] {
-            "" => format!("{}/api/v2/orgs", self.url),
-            _  => format!("{}/api/v2/orgs?{}", self.url, qs),
-        };
+        let mut endpoint = "/api/v2/orgs".to_owned();
+        if !qs.is_empty() {
+            endpoint.push_str("?");
+            endpoint.push_str(&qs);
+        }
+        let url = self.url(&endpoint);
         
         let response = self
             .request(Method::GET, &url)

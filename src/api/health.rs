@@ -10,7 +10,7 @@ use snafu::ResultExt;
 impl Client {
     /// Get health of an instance
     pub async fn health(&self) -> Result<HealthCheck, RequestError> {
-        let health_url = format!("{}/health", self.url);
+        let health_url = self.url("/health");
         let response = self
             .request(Method::GET, &health_url)
             .send()

@@ -99,8 +99,7 @@
 //! }
 //! ```
 
-
-use reqwest::Method;
+use reqwest::{Method, Url};
 use snafu::Snafu;
 
 /// Errors that occur while making requests to the Influx server.
@@ -144,7 +143,7 @@ pub enum RequestError {
 #[derive(Debug, Clone)]
 pub struct Client {
     /// The base URL this client sends requests to
-    pub url: String,
+    pub base: Url,
     /// The organization tied to this client
     pub org: String,
     auth_header: Option<String>,
@@ -173,8 +172,11 @@ impl Client {
             Some(format!("Token {}", token))
         };
 
+        let url: String = url.into();
+        let base = Url::parse(&url).expect(&format!("Invalid url was provided: {}", &url));
+
         Self {
-            url: url.into(),
+            base,
             org: org.into(),
             auth_header,
             reqwest: reqwest::Client::new(),
@@ -191,6 +193,13 @@ impl Client {
 
         req
     }
+
+    /// Join base Url of the client to target API endpoint into valid Url
+    fn url(&self, endpoint: &str) -> String {
+        let mut url = self.base.clone();
+        url.set_path(endpoint);
+        url.into()
+    }
 }
 
 pub mod common;
@@ -201,3 +210,25 @@ pub mod models;
 // Re-exports
 pub use influxdb2_structmap::FromMap;
 pub use influxdb2_derive::FromDataPoint;
+
+#[cfg(test)]
+mod tests {
+    use crate::Client;
+
+    #[test]
+    fn url_invalid_panic() {
+        let result = std::panic::catch_unwind(|| Client::new("/3242/23", "some-org", "some-token"));
+        assert!(result.is_err());
+    }
+
+    #[test]
+    /// Reproduction of https://github.com/aprimadi/influxdb2/issues/6
+    fn url_ignores_double_slashes() {
+        let base = "http://influxdb.com/";
+        let client = Client::new(base, "some-org", "some-token");
+
+        assert_eq!(format!("{}api/v2/write", base), client.url("/api/v2/write"));
+
+        assert_eq!(client.url("/api/v2/write"), client.url("api/v2/write"));
+    }
+}

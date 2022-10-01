@@ -31,7 +31,7 @@ impl Client {
         stop: NaiveDateTime,
         predicate: Option<String>,
     ) -> Result<(), RequestError> {
-        let delete_url = format!("{}/api/v2/delete", self.url);
+        let delete_url = self.url("/api/v2/delete");
         
         let body = serde_json::json!({
             "start": start.format("%Y-%m-%dT%H:%M:%SZ").to_string(),
