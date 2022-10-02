@@ -14,10 +14,12 @@ impl Client {
         request: Option<ListBucketsRequest>,
     ) -> Result<Buckets, RequestError> {
         let qs = serde_qs::to_string(&request).unwrap();
-        let url = match &qs[..] {
-            "" => format!("{}/api/v2/buckets", self.url),
-            _  => format!("{}/api/v2/buckets?{}", self.url, qs),
-        };
+        let mut endpoint = "/api/v2/buckets".to_owned();
+        if !qs.is_empty() {
+            endpoint.push_str("?");
+            endpoint.push_str(&qs);
+        }
+        let url = self.url(&endpoint);
 
         let response = self
             .request(Method::GET, &url)
@@ -46,7 +48,7 @@ impl Client {
         &self,
         post_bucket_request: Option<PostBucketRequest>,
     ) -> Result<(), RequestError> {
-        let create_bucket_url = format!("{}/api/v2/buckets", self.url);
+        let create_bucket_url = self.url("/api/v2/buckets");
 
         let response = self
             .request(Method::POST, &create_bucket_url)
@@ -68,11 +70,9 @@ impl Client {
     }
 
     /// Delete a bucket specified by bucket id.
-    pub async fn delete_bucket(
-        &self, 
-        bucket_id: &str
-    ) -> Result<(), RequestError> {
-        let url = format!("{}/api/v2/buckets/{}", self.url, bucket_id);
+    pub async fn delete_bucket(&self, bucket_id: &str) -> Result<(), RequestError> {
+        let url = self.url(&format!("/api/v2/buckets/{}", bucket_id));
+
         let response = self
             .request(Method::DELETE, &url)
             .send()

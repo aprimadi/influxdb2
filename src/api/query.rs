@@ -25,7 +25,7 @@ use crate::models::{
 impl Client {
     /// Get Query Suggestions
     pub async fn query_suggestions(&self) -> Result<FluxSuggestions, RequestError> {
-        let req_url = format!("{}/api/v2/query/suggestions", self.url);
+        let req_url = self.url("/api/v2/query/suggestions");
         let response = self
             .request(Method::GET, &req_url)
             .send()
@@ -46,11 +46,10 @@ impl Client {
 
     /// Query Suggestions with name
     pub async fn query_suggestions_name(&self, name: &str) -> Result<FluxSuggestion, RequestError> {
-        let req_url = format!(
-            "{}/api/v2/query/suggestions/{name}",
-            self.url,
-            name = crate::common::urlencode(name),
-        );
+        let req_url = self.url(&format!(
+            "/api/v2/query/suggestions/{name}",
+            name = crate::common::urlencode(name)
+        ));
 
         let response = self
             .request(Method::GET, &req_url)
@@ -71,11 +70,8 @@ impl Client {
     }
 
     /// Query
-    pub async fn query<T: FromMap>(
-        &self, 
-        query: Option<Query>
-    ) -> Result<Vec<T>, RequestError> {
-        let req_url = format!("{}/api/v2/query", self.url);
+    pub async fn query<T: FromMap>(&self, query: Option<Query>) -> Result<Vec<T>, RequestError> {
+        let req_url = self.url("/api/v2/query");
         let body = serde_json::to_string(&query.unwrap_or_default()).context(Serializing)?;
 
         let response = self
@@ -111,7 +107,7 @@ impl Client {
         &self,
         query: Option<Query>,
     ) -> Result<AnalyzeQueryResponse, RequestError> {
-        let req_url = format!("{}/api/v2/query/analyze", self.url);
+        let req_url = self.url("/api/v2/query/analyze");
 
         let response = self
             .request(Method::POST, &req_url)
@@ -138,7 +134,7 @@ impl Client {
         &self,
         language_request: Option<LanguageRequest>,
     ) -> Result<AstResponse, RequestError> {
-        let req_url = format!("{}/api/v2/query/ast", self.url);
+        let req_url = self.url("/api/v2/query/ast");
 
         let response = self
             .request(Method::POST, &req_url)

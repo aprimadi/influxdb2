@@ -10,7 +10,7 @@ use crate::{Client, Http, RequestError, ReqwestProcessing};
 impl Client {
     /// Get the readiness of an instance at startup
     pub async fn ready(&self) -> Result<bool, RequestError> {
-        let ready_url = format!("{}/ready", self.url);
+        let ready_url = self.url("/ready");
         let response = self
             .request(Method::GET, &ready_url)
             .send()

@@ -14,10 +14,12 @@ impl Client {
         request: ListTasksRequest,
     ) -> Result<Tasks, RequestError> {
         let qs = serde_qs::to_string(&request).unwrap();
-        let url = match &qs[..] {
-            "" => format!("{}/api/v2/tasks", self.url),
-            _  => format!("{}/api/v2/tasks?{}", self.url, qs),
-        };
+        let mut endpoint = "/api/v2/tasks".to_owned();
+        if !qs.is_empty() {
+            endpoint.push_str("?");
+            endpoint.push_str(&qs);
+        }
+        let url = self.url(&endpoint);
 
         let response = self
             .request(Method::GET, &url)
@@ -44,7 +46,7 @@ impl Client {
         &self,
         request: CreateTaskRequest,
     ) -> Result<(), RequestError> {
-        let url = format!("{}/api/v2/tasks", self.url);
+        let url = self.url("/api/v2/tasks");
         let response = self
             .request(Method::POST, &url)
             .body(
@@ -66,7 +68,7 @@ impl Client {
 
     /// Delete a task specified by task_id.
     pub async fn delete_task(&self, task_id: &str) -> Result<(), RequestError> {
-        let url = format!("{}/api/v2/tasks/{}", self.url, task_id);
+        let url = self.url(&format!("/api/v2/tasks/{}", task_id));
         let response = self
             .request(Method::DELETE, &url)
             .send()

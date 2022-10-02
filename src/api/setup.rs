@@ -11,7 +11,7 @@ use crate::models::{IsOnboarding, OnboardingRequest, OnboardingResponse};
 impl Client {
     /// Check if database has default user, org, bucket
     pub async fn is_onboarding_allowed(&self) -> Result<bool, RequestError> {
-        let setup_url = format!("{}/api/v2/setup", self.url);
+        let setup_url = self.url("/api/v2/setup");
         let response = self
             .request(Method::GET, &setup_url)
             .send()
@@ -41,7 +41,7 @@ impl Client {
         retention_period_hrs: Option<i32>,
         retention_period_seconds: Option<i32>,
     ) -> Result<OnboardingResponse, RequestError> {
-        let setup_init_url = format!("{}/api/v2/setup", self.url);
+        let setup_init_url = self.url("/api/v2/setup");
 
         let body = OnboardingRequest {
             username: username.into(),
@@ -81,7 +81,7 @@ impl Client {
         retention_period_hrs: Option<i32>,
         retention_period_seconds: Option<i32>,
     ) -> Result<OnboardingResponse, RequestError> {
-        let setup_new_url = format!("{}/api/v2/setup/user", self.url);
+        let setup_new_url = self.url("/api/v2/setup/user");
 
         let body = OnboardingRequest {
             username: username.into(),

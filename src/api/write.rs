@@ -17,7 +17,7 @@ impl Client {
         body: impl Into<Body> + Send,
     ) -> Result<(), RequestError> {
         let body = body.into();
-        let write_url = format!("{}/api/v2/write", self.url);
+        let write_url = self.url("/api/v2/write");
 
         let response = self
             .request(Method::POST, &write_url)
