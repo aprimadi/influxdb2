@@ -59,3 +59,8 @@
 
 - Add support for rustls
 
+0.3.3
+=====
+
+- Handle trailing slash in host url
+- Handle non successful return in write API
