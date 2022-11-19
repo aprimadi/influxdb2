@@ -12,7 +12,7 @@ edition = "2018"
 [features]
 default = ["native-tls"]
 native-tls = ["reqwest/native-tls"]
-rustls = ["reqwest/rustls"]
+rustls = ["reqwest/rustls-tls"]
 
 [dependencies] # In alphabetical order
 influxdb2-structmap = { version = "0.2.0", path = "./influxdb2-structmap" }
