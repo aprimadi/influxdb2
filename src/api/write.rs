@@ -123,7 +123,7 @@ mod tests {
 
         let mock_server = mock(
             "POST",
-            format!("/api/v2/write?bucket={}&org={}", bucket, org).as_str(),
+            format!("/api/v2/write?bucket={}&org={}&precision=ns", bucket, org).as_str(),
         )
         .match_header("Authorization", format!("Token {}", token).as_str())
         .match_body(
@@ -210,7 +210,7 @@ cpu,host=server01 usage=0.5 1671095854
         let make_mock_server = |status| {
             mock(
                 "POST",
-                format!("/api/v2/write?bucket={}&org={}", bucket, org).as_str(),
+                format!("/api/v2/write?bucket={}&org={}&precision=ns", bucket, org).as_str(),
             )
             .with_status(status)
             .create()

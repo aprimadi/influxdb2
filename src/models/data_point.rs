@@ -54,8 +54,10 @@ impl DataPointBuilder {
 
     /// Sets the timestamp, replacing any existing timestamp.
     ///
-    /// The value is treated as the number of nanoseconds since the
+    /// When using write, the value is treated as the number of nanoseconds since the
     /// UNIX epoch.
+    ///
+    /// When using write_with_precision, the value is interpreted according to the configured precision.
     pub fn timestamp(mut self, value: i64) -> Self {
         self.timestamp = Some(value);
         self
