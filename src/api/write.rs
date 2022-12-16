@@ -85,10 +85,15 @@ impl Client {
 }
 
 /// Possible timestamp precisions.
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub enum TimestampPrecision{
+    /// Seconds timestamp precision
     Seconds,
+    /// Milliseconds timestamp precision
     Milliseconds,
+    /// Microseconds timestamp precision
     Microseconds,
+    /// Nanoseconds timestamp precision
     Nanoseconds
 }
 
