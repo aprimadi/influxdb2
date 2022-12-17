@@ -70,3 +70,8 @@
 
 - Fix invalid feature flag rustls
 
+0.3.5
+=====
+
+- Adding write API with specified timestamp precision
+
