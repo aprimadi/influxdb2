@@ -10,18 +10,31 @@ use std::io::{self, Write};
 
 impl Client {
     /// Write line protocol data to the specified organization and bucket.
+    /// This method writes with default timestamp precision (nanoseconds).
+    /// Use write_line_protocol_with_precision if you want to write with a different precision.
     pub async fn write_line_protocol(
         &self,
         org: &str,
         bucket: &str,
         body: impl Into<Body> + Send,
     ) -> Result<(), RequestError> {
+        self.write_line_protocol_with_precision(org, bucket, body, TimestampPrecision::Nanoseconds).await
+    }
+
+    /// Write line protocol data to the specified organization and bucket.
+    pub async fn write_line_protocol_with_precision(
+        &self,
+        org: &str,
+        bucket: &str,
+        body: impl Into<Body> + Send,
+        precision: TimestampPrecision
+    ) -> Result<(), RequestError> {
         let body = body.into();
         let write_url = self.url("/api/v2/write");
 
         let response = self
             .request(Method::POST, &write_url)
-            .query(&[("bucket", bucket), ("org", org)])
+            .query(&[("bucket", bucket), ("org", org), ("precision", precision.api_short_name())])
             .body(body)
             .send()
             .await
@@ -38,10 +51,23 @@ impl Client {
 
     /// Write a `Stream` of `DataPoint`s to the specified organization and
     /// bucket.
+    /// This method writes with default timestamp precision (nanoseconds).
+    /// Use write_with_precision if you want to write with a different precision.
     pub async fn write(
         &self,
         bucket: &str,
+        body: impl Stream<Item = impl WriteDataPoint> + Send + Sync + 'static
+    ) -> Result<(), RequestError> {
+        self.write_with_precision(bucket, body, TimestampPrecision::Nanoseconds).await
+    }
+
+    /// Write a `Stream` of `DataPoint`s to the specified organization and
+    /// bucket.
+    pub async fn write_with_precision(
+        &self,
+        bucket: &str,
         body: impl Stream<Item = impl WriteDataPoint> + Send + Sync + 'static,
+        timestamp_precision: TimestampPrecision
     ) -> Result<(), RequestError> {
         let mut buffer = bytes::BytesMut::new();
 
@@ -54,7 +80,31 @@ impl Client {
 
         let body = Body::wrap_stream(body);
 
-        Ok(self.write_line_protocol(&self.org, bucket, body).await?)
+        Ok(self.write_line_protocol_with_precision(&self.org, bucket, body, timestamp_precision).await?)
+    }
+}
+
+/// Possible timestamp precisions.
+#[derive(Debug, PartialEq, Copy, Clone)]
+pub enum TimestampPrecision{
+    /// Seconds timestamp precision
+    Seconds,
+    /// Milliseconds timestamp precision
+    Milliseconds,
+    /// Microseconds timestamp precision
+    Microseconds,
+    /// Nanoseconds timestamp precision
+    Nanoseconds
+}
+
+impl TimestampPrecision{
+    fn api_short_name(&self) -> &'static str{
+        match self {
+            TimestampPrecision::Seconds => "s",
+            TimestampPrecision::Milliseconds => "ms",
+            TimestampPrecision::Microseconds => "us",
+            TimestampPrecision::Nanoseconds => "ns"
+        }
     }
 }
 
@@ -73,7 +123,7 @@ mod tests {
 
         let mock_server = mock(
             "POST",
-            format!("/api/v2/write?bucket={}&org={}", bucket, org).as_str(),
+            format!("/api/v2/write?bucket={}&org={}&precision=ns", bucket, org).as_str(),
         )
         .match_header("Authorization", format!("Token {}", token).as_str())
         .match_body(
@@ -112,6 +162,46 @@ cpu,host=server01,region=us-west usage=0.87
     }
 
     #[tokio::test]
+    async fn writing_points_with_precision() {
+        let org = "some-org";
+        let bucket = "some-bucket";
+        let token = "some-token";
+
+        let mock_server = mock(
+            "POST",
+            format!("/api/v2/write?bucket={}&org={}&precision=s", bucket, org).as_str(),
+        )
+            .match_header("Authorization", format!("Token {}", token).as_str())
+            .match_body(
+                "\
+cpu,host=server01 usage=0.5 1671095854
+",
+            )
+            .with_status(204)
+            .create();
+
+        let client = Client::new(&mockito::server_url(), org, token);
+
+        let points = vec![
+            DataPoint::builder("cpu")
+                .tag("host", "server01")
+                .field("usage", 0.5)
+                .timestamp(1671095854)
+                .build()
+                .unwrap()
+        ];
+
+        // If the requests made are incorrect, Mockito returns status 501 and `write`
+        // will return an error, which causes the test to fail here instead of
+        // when we assert on mock_server. The error messages that Mockito
+        // provides are much clearer for explaining why a test failed than just
+        // that the server returned 501, so don't use `?` here.
+        let result = client.write_with_precision(bucket, stream::iter(points), TimestampPrecision::Seconds).await;
+        mock_server.assert();
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
     async fn status_code_correctly_interpreted() {
         let org = "org";
         let token = "token";
@@ -120,7 +210,7 @@ cpu,host=server01,region=us-west usage=0.87
         let make_mock_server = |status| {
             mock(
                 "POST",
-                format!("/api/v2/write?bucket={}&org={}", bucket, org).as_str(),
+                format!("/api/v2/write?bucket={}&org={}&precision=ns", bucket, org).as_str(),
             )
             .with_status(status)
             .create()
