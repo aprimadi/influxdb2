@@ -64,3 +64,9 @@
 
 - Handle trailing slash in host url
 - Handle non successful return in write API
+
+0.3.4
+=====
+
+- Fix invalid feature flag rustls
+
