@@ -1,19 +1,23 @@
-//! Implements the functionality to enable conversion between a struct type a 
+//! Implements the functionality to enable conversion between a struct type a
 //! map container type in Rust through the use of a procedural macros.
 #![recursion_limit = "128"]
 
 extern crate proc_macro;
+mod expand_tuple;
+mod expand_writable;
 
+use expand_tuple::{make_tuple_fields, make_tuple_tags};
+use expand_writable::impl_writeable;
 use itertools::izip;
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{Data, DeriveInput, Ident};
 
-/// Implements the functionality for converting entries in a BTreeMap into 
-/// attributes and values of a struct. It will consume a tokenized version of 
-/// the initial struct declaration, and use code generation to implement the 
+/// Implements the functionality for converting entries in a BTreeMap into
+/// attributes and values of a struct. It will consume a tokenized version of
+/// the initial struct declaration, and use code generation to implement the
 /// `FromMap` trait for instantiating the contents of the struct.
-#[proc_macro_derive(FromDataPoint )]
+#[proc_macro_derive(FromDataPoint)]
 pub fn from_data_point(input: TokenStream) -> TokenStream {
     let ast = syn::parse_macro_input!(input as DeriveInput);
 
@@ -219,6 +223,21 @@ pub fn from_data_point(input: TokenStream) -> TokenStream {
     TokenStream::from(tokens)
 }
 
+#[proc_macro]
+pub fn impl_tuple_tags(tokens: TokenStream) -> TokenStream {
+    make_tuple_tags(tokens)
+}
+
+#[proc_macro]
+pub fn impl_tuple_fields(tokens: TokenStream) -> TokenStream {
+    make_tuple_fields(tokens)
+}
+
+#[proc_macro_derive(WriteDataPoint, attributes(measurement, influxdb))]
+pub fn impl_influx_writable(tokens: TokenStream) -> TokenStream {
+    impl_writeable(tokens)
+}
+
 #[cfg(test)]
 mod tests {
     #[test]
@@ -226,6 +245,6 @@ mod tests {
         let t = trybuild::TestCases::new();
         t.pass("tests/struct.rs");
         t.pass("tests/multistruct.rs");
+        t.pass("tests/writable.rs")
     }
 }
-

@@ -18,7 +18,7 @@ syn = { version = "1.0.58", features = ["full", "extra-traits"] }
 
 [dev-dependencies]
 influxdb2-structmap = { path = "../influxdb2-structmap" }
-
+influxdb2 = {path="../"}
 # crates.io dependencies
 chrono = "0.4"
 num-traits = "0.2"

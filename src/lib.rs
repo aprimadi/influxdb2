@@ -1,3 +1,4 @@
+#![recursion_limit = "1024"]
 #![deny(rustdoc::broken_intra_doc_links, rust_2018_idioms)]
 #![warn(
     missing_copy_implementations,
@@ -10,26 +11,26 @@
 )]
 
 //! # influxdb2
-//! 
+//!
 //! This is a Rust client to InfluxDB using the [2.0 API][2api].
-//! 
+//!
 //! [2api]: https://v2.docs.influxdata.com/v2.0/reference/api/
-//! 
-//! This project is a fork from the 
+//!
+//! This project is a fork from the
 //! https://github.com/influxdata/influxdb_iox/tree/main/influxdb2_client project.
-//! At the time of this writing, the query functionality of the influxdb2 client 
-//! from the official repository isn't working. So, I created this client to use 
+//! At the time of this writing, the query functionality of the influxdb2 client
+//! from the official repository isn't working. So, I created this client to use
 //! it in my project.
-//! 
+//!
 //! ## Usage
-//! 
+//!
 //! ### Querying
-//! 
+//!
 //! ```rust
 //! use chrono::{DateTime, FixedOffset};
 //! use influxdb2::{Client, FromDataPoint};
 //! use influxdb2::models::Query;
-//! 
+//!
 //! #[derive(Debug, FromDataPoint)]
 //! pub struct StockPrice {
 //!     ticker: String,
@@ -46,16 +47,16 @@
 //!         }
 //!     }
 //! }
-//! 
+//!
 //! async fn example() -> Result<(), Box<dyn std::error::Error>> {
 //!     let host = std::env::var("INFLUXDB_HOST").unwrap();
 //!     let org = std::env::var("INFLUXDB_ORG").unwrap();
 //!     let token = std::env::var("INFLUXDB_TOKEN").unwrap();
 //!     let client = Client::new(host, org, token);
-//! 
-//!     let qs = format!("from(bucket: \"stock-prices\") 
+//!
+//!     let qs = format!("from(bucket: \"stock-prices\")
 //!         |> range(start: -1w)
-//!         |> filter(fn: (r) => r.ticker == \"{}\") 
+//!         |> filter(fn: (r) => r.ticker == \"{}\")
 //!         |> last()
 //!     ", "AAPL");
 //!     let query = Query::new(qs.to_string());
@@ -66,9 +67,9 @@
 //!     Ok(())
 //! }
 //! ```
-//! 
+//!
 //! ### Writing
-//! 
+//!
 //! ```rust
 //! async fn example() -> Result<(), Box<dyn std::error::Error>> {
 //!     use futures::prelude::*;
@@ -161,9 +162,9 @@ impl Client {
     /// let client = influxdb2::Client::new("http://localhost:8888", "org", "my-token");
     /// ```
     pub fn new(
-        url: impl Into<String>, 
-        org: impl Into<String>, 
-        auth_token: impl Into<String>
+        url: impl Into<String>,
+        org: impl Into<String>,
+        auth_token: impl Into<String>,
     ) -> Self {
         let token = auth_token.into();
         let auth_header = if token.is_empty() {
@@ -206,10 +207,11 @@ pub mod common;
 
 pub mod api;
 pub mod models;
+pub mod writable;
 
 // Re-exports
-pub use influxdb2_structmap::FromMap;
 pub use influxdb2_derive::FromDataPoint;
+pub use influxdb2_structmap::FromMap;
 
 #[cfg(test)]
 mod tests {
