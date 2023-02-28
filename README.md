@@ -121,9 +121,10 @@ Implemented API
 - [ ] Task API (partial: only list, create, delete)
 
 ## TLS Implementations
-This crate uses [reqwest](https://github.com/seanmonstar/reqwest) under the hood.
-You can choose between `native-tls` and `rustls` with the features provided with this crate.
-`native-tls` is chosen as the default, like reqwest does.
+This crate uses [reqwest](https://github.com/seanmonstar/reqwest) under the 
+hood. You can choose between `native-tls` and `rustls` with the features 
+provided with this crate. `native-tls` is chosen as the default, like reqwest 
+does.
 
 ```toml
 # Usage for native-tls (the default).
