@@ -65,16 +65,6 @@ pub fn impl_writeable(tokens: TokenStream) -> TokenStream {
         })
         .collect();
 
-    let tag_writes = tag_writes
-        .windows(2)
-        .flat_map(|pair| {
-            vec![
-                pair[0].clone(),
-                quote!(w.write_all(b",")?;),
-                pair[1].clone(),
-            ]
-        })
-        .collect::<Vec<_>>();
     let fields_writes: Vec<TokenStream2> = fields
         .iter()
         .filter_map(|f| match f.field_type {
@@ -92,16 +82,6 @@ pub fn impl_writeable(tokens: TokenStream) -> TokenStream {
         })
         .collect();
 
-    let fields_writes = fields_writes
-        .windows(2)
-        .flat_map(|pair| {
-            vec![
-                pair[0].clone(),
-                quote!(w.write_all(b",")?;),
-                pair[1].clone(),
-            ]
-        })
-        .collect::<Vec<_>>();
     let timestamp_writes: Vec<TokenStream2>  = fields
         .iter()
         .filter_map(|f| match f.field_type {
@@ -115,17 +95,33 @@ pub fn impl_writeable(tokens: TokenStream) -> TokenStream {
             _ => None,
         })
         .collect();
-
+    
     if tag_writes.len() < 1 {
-        panic!("You have specify at least one #[tag] field.")
+        panic!("You have to specify at least one #[tag] field.")
     }
     if timestamp_writes.len() != 1 {
-        panic!("You have specify at exact one #[timestamp] field.")
+        panic!("You have to specify at exact one #[timestamp] field.")
     }
     if fields_writes.len() < 1 {
-        panic!("You have specify at least one #[field] field.")
+        panic!("You have to specify at least one #[field] field.")
     }
 
+    let mut combined_tag_writes = vec![];
+    for (index, tag_write) in tag_writes.iter().enumerate() {
+        if index > 0 {
+            combined_tag_writes.push(quote!(w.write_all(b",")?;));
+        }
+        combined_tag_writes.push(tag_write.clone());
+    }
+    
+    let mut combined_fields_writes = vec![];
+    for (index, fields_write) in fields_writes.iter().enumerate() {
+        if index > 0 {
+            combined_fields_writes.push(quote!(w.write_all(b",")?;));
+        }
+        combined_fields_writes.push(fields_write.clone());
+    }
+    
     let output = quote! {
         impl #generics #krate::models::WriteDataPoint for #ident #generics
         {
@@ -135,11 +131,11 @@ pub fn impl_writeable(tokens: TokenStream) -> TokenStream {
                 w.write_all(format!("{},", #measure).as_bytes())?;
 
                 #(
-                    #tag_writes
+                    #combined_tag_writes
                 )*
                 w.write_all(b" ")?;
                 #(
-                    #fields_writes
+                    #combined_fields_writes
                 )*
                 w.write_all(b" ")?;
                 #(
