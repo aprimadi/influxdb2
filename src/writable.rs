@@ -162,11 +162,17 @@ impl_tuple_fields!((K1, V1, K2, V2, K3, V3, K4, V4, K5, V5, K6, V6, K7, V7));
 /// Any type wants to be a timestamp needs to implement this
 pub trait TimestampWritable {
     /// encode into string like "1465839830100400200"
-    fn encode_timestramp(&self) -> String;
+    fn encode_timestamp(&self) -> String;
 }
 
 impl TimestampWritable for u64 {
-    fn encode_timestramp(&self) -> String {
+    fn encode_timestamp(&self) -> String {
+        self.to_string()
+    }
+}
+
+impl TimestampWritable for i64 {
+    fn encode_timestamp(&self) -> String {
         self.to_string()
     }
 }

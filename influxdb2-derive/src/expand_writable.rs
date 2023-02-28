@@ -109,7 +109,7 @@ pub fn impl_writeable(tokens: TokenStream) -> TokenStream {
                 let ident = f.ident.clone();
                 let kind = f.kind.clone();
                 Some(quote! {
-                    w.write_all(<#kind as #writable_krate::TimestampWritable>::encode_timestramp(&self.#ident).into_bytes().as_slice())?;
+                    w.write_all(<#kind as #writable_krate::TimestampWritable>::encode_timestamp(&self.#ident).into_bytes().as_slice())?;
                 })
             }
             _ => None,
