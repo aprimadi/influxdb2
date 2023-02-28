@@ -1,14 +1,14 @@
 use chrono::Utc;
 use futures::prelude::*;
-use influxdb2::FromDataPoint;
 use influxdb2_derive::WriteDataPoint;
 
 #[derive(Default, WriteDataPoint)]
+#[measurement = "cpu_load_short"]
 struct CpuLoadShort {
     #[influxdb(tag)]
-    host: String,
+    host: Option<String>,
     #[influxdb(tag)]
-    region: String,
+    region: Option<String>,
     #[influxdb(field)]
     value: f64,
     #[influxdb(timestamp)]
@@ -26,14 +26,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let points = vec![
         CpuLoadShort {
-            host: "server01".to_owned(),
-            region: "us-west".to_owned(),
+            host: Some("server01".to_owned()),
+            region: Some("us-west".to_owned()),
             value: 0.64,
             time: Utc::now().timestamp_nanos(),
         },
         CpuLoadShort {
-            host: "server02".to_owned(),
-            region: "us-east".to_owned(),
+            host: Some("server02".to_owned()),
+            region: None,
             value: 0.64,
             time: Utc::now().timestamp_nanos(),
         },
