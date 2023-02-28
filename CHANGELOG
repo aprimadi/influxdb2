@@ -75,3 +75,7 @@
 
 - Adding write API with specified timestamp precision
 
+0.3.6
+=====
+
+- Added WriteDataPoint derive macro
