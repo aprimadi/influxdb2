@@ -141,6 +141,8 @@ pub fn impl_writeable(tokens: TokenStream) -> TokenStream {
                 #(
                     #timestamp_writes
                 )*
+                w.write_all(b"\n")?;
+
                 Ok(())
             }
         }
