@@ -51,18 +51,20 @@ impl ValueWritable for u64 {
 
 impl ValueWritable for String {
     fn encode_value(&self) -> String {
-        self.clone()
+        format!("\"{}\"", self)
     }
 }
 
 impl ValueWritable for &str {
     fn encode_value(&self) -> String {
-        self.to_string()
+        format!("\"{}\"", self)
     }
 }
 
 impl ValueWritable for bool {
     fn encode_value(&self) -> String {
+        // bool type in influxdb2
+        // https://docs.influxdata.com/influxdb/v2.6/reference/syntax/line-protocol/#boolean
         if *self {
             "t".to_string()
         } else {
@@ -75,7 +77,7 @@ impl<T: ValueWritable> ValueWritable for Option<T> {
     fn encode_value(&self) -> String {
         match self {
             Some(v) => v.encode_value(),
-            None => "None".to_string(),
+            None => "\"None\"".to_string(),
         }
     }
 }
