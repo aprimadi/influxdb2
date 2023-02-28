@@ -46,7 +46,7 @@ fn main() {
     println!("{}", std::str::from_utf8(&writer).unwrap());
     assert_eq!(
         &writer[..],
-        b"something,name=foo,name2=bar field1=32u,field2=33i,field3=\"hello\" 222222"
+        b"something,name=foo,name2=bar field1=32u,field2=33i,field3=\"hello\" 222222\n"
     );
 
     let item = Item2 {
@@ -63,6 +63,6 @@ fn main() {
     println!("{}", std::str::from_utf8(&writer).unwrap());
     assert_eq!(
         &writer[..],
-        b"something,name=foo,name2=None field1=\"None\",field2=33i 222222"
+        b"something,name=foo,name2=None field1=\"None\",field2=33i 222222\n"
     )
 }
