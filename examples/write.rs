@@ -1,28 +1,46 @@
+use chrono::Utc;
 use futures::prelude::*;
+use influxdb2::FromDataPoint;
+use influxdb2_derive::WriteDataPoint;
+
+#[derive(Default, WriteDataPoint)]
+struct CpuLoadShort {
+    #[influxdb(tag)]
+    host: String,
+    #[influxdb(tag)]
+    region: String,
+    #[influxdb(field)]
+    value: f64,
+    #[influxdb(timestamp)]
+    time: i64,
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let org = "myorg";
-    let bucket = "mybucket";
-    let influx_url = "http://localhost:9999";
-    let token = "my-token";
+    let org = "sahamee";
+    let bucket = "bucket";
+    let influx_url = "http://localhost:8086";
+    let token = std::env::var("INFLUXDB2_TOKEN").unwrap();
 
     let client = influxdb2::Client::new(influx_url, org, token);
 
     let points = vec![
-        influxdb2::models::DataPoint::builder("cpu_load_short")
-            .tag("host", "server01")
-            .tag("region", "us-west")
-            .field("value", 0.64)
-            .build()?,
-        influxdb2::models::DataPoint::builder("cpu_load_short")
-            .tag("host", "server01")
-            .field("value", 27.99)
-            .build()?,
+        CpuLoadShort {
+            host: "server01".to_owned(),
+            region: "us-west".to_owned(),
+            value: 0.64,
+            time: Utc::now().timestamp(),
+        },
+        CpuLoadShort {
+            host: "server02".to_owned(),
+            region: "us-east".to_owned(),
+            value: 0.64,
+            time: Utc::now().timestamp(),
+        },
     ];
 
     client.write(bucket, stream::iter(points)).await?;
-
+    
     Ok(())
 }
 
