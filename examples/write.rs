@@ -29,13 +29,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             host: "server01".to_owned(),
             region: "us-west".to_owned(),
             value: 0.64,
-            time: Utc::now().timestamp(),
+            time: Utc::now().timestamp_nanos(),
         },
         CpuLoadShort {
             host: "server02".to_owned(),
             region: "us-east".to_owned(),
             value: 0.64,
-            time: Utc::now().timestamp(),
+            time: Utc::now().timestamp_nanos(),
         },
     ];
 
