@@ -1,6 +1,6 @@
 [package]
 name = "influxdb2"
-version = "0.3.6"
+version = "0.3.7"
 authors = ["Armin Primadi <aprimadi@gmail.com>", "Paul Dix <paul@pauldix.net>"]
 keywords = ["influxdb", "influxdb2", "influxdb-client"]
 description = "Influxdb 2 client library for rust"
@@ -16,7 +16,7 @@ rustls = ["reqwest/rustls-tls"]
 
 [dependencies] # In alphabetical order
 influxdb2-structmap = { version = "0.2.0", path = "./influxdb2-structmap" }
-influxdb2-derive = { version = "0.1.0", path = "./influxdb2-derive" }
+influxdb2-derive = { version = "0.1.1", path = "./influxdb2-derive" }
 
 # crates.io dependencies
 base64 = "0.13"

@@ -3,7 +3,7 @@ name = "influxdb2-derive"
 description = "Proc derive macro for Influxdb"
 authors = ["Armin Primadi <aprimadi@gmail.com>", "ex0dus-0x <ex0dus@codemuch.tech>"]
 license = "MIT"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2018"
 
 [lib]
@@ -23,4 +23,3 @@ influxdb2 = {path="../"}
 chrono = "0.4"
 num-traits = "0.2"
 trybuild = "1.0"
-

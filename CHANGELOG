@@ -79,3 +79,8 @@
 =====
 
 - Added WriteDataPoint derive macro
+
+0.3.7
+=====
+
+- Added WriteDataPoint derive macro
