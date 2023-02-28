@@ -63,29 +63,47 @@ async fn example() -> Result<(), Box<dyn std::error::Error>> {
 ### Writing
 
 ```rust
+#[derive(Default, WriteDataPoint)]
+#[measurement = "cpu_load_short"]
+struct CpuLoadShort {
+    #[influxdb(tag)]
+    host: Option<String>,
+    #[influxdb(tag)]
+    region: Option<String>,
+    #[influxdb(field)]
+    value: f64,
+    #[influxdb(timestamp)]
+    time: i64,
+}
+
 async fn example() -> Result<(), Box<dyn std::error::Error>> {
+    use chrono::Utc;
     use futures::prelude::*;
     use influxdb2::models::DataPoint;
     use influxdb2::Client;
+    use influxdb2_derive::WriteDataPoint;
 
     let host = std::env::var("INFLUXDB_HOST").unwrap();
     let org = std::env::var("INFLUXDB_ORG").unwrap();
     let token = std::env::var("INFLUXDB_TOKEN").unwrap();
-    let bucket = "bucket";
+    let bucket = std::env::var("INFLUXDB_BUCKET").unwrap();
     let client = Client::new(host, org, token);
     
     let points = vec![
-        DataPoint::builder("cpu")
-            .tag("host", "server01")
-            .field("usage", 0.5)
-            .build()?,
-        DataPoint::builder("cpu")
-            .tag("host", "server01")
-            .tag("region", "us-west")
-            .field("usage", 0.87)
-            .build()?,
+        CpuLoadShort {
+            host: Some("server01".to_owned()),
+            region: Some("us-west".to_owned()),
+            value: 0.64,
+            time: Utc::now().timestamp_nanos(),
+        },
+        CpuLoadShort {
+            host: Some("server02".to_owned()),
+            region: None,
+            value: 0.64,
+            time: Utc::now().timestamp_nanos(),
+        },
     ];
-                                                            
+
     client.write(bucket, stream::iter(points)).await?;
     
     Ok(())
