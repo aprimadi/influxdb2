@@ -332,42 +332,6 @@ where
     w.write_all(value[last..].as_bytes())
 }
 
-// struct Item {
-//     name: String,
-//     name2: String,
-//     field1: u64,
-//     field2: i64,
-//     time: u64,
-// }
-// impl WriteDataPoint for Item {
-//     fn write_data_point_to<W>(&self, w: W) -> std::io::Result<()>
-//     where
-//         W: std::io::Write,
-//     {
-//         w.write_all(b"#measure,")?;
-//         w.write_all(b"#ident")?;
-//         w.write_all(b"=")?;
-//         w.write_all(<String as KeyWritable>::encode_key(self.name).into_bytes().as_slice())?;
-//         w.write_all(b",")?;
-//         w.write_all(b"#ident")?;
-//         w.write_all(b"=")?;
-//         w.write_all(<String as KeyWritable>::encode_key(self.name2).into_bytes().as_slice())?;
-//         w.write_all(b",")?;
-//         w.write_all(b" ")?;
-//         w.write_all(b"#ident")?;
-//         w.write_all(b"=")?;
-//         w.write_all(<u64 as ValueWritable>::encode_value(self.field1).into_bytes().as_slice())?;
-//         w.write_all(b",")?;
-//         w.write_all(b"#ident")?;
-//         w.write_all(b"=")?;
-//         w.write_all(<i64 as ValueWritable>::encode_value(self.field2).into_bytes().as_slice())?;
-//         w.write_all(b",")?;
-//         w.write_all(b" ")?;
-//         w.write_all(b"timestamp=")?;
-//         w.write_all(<u64 as TimestampWritable>::encode_timestramp(self.time).into_bytes().as_slice())?;
-//         Ok(())
-//     }
-// }
 #[cfg(test)]
 mod tests {
     use super::*;
