@@ -9,7 +9,6 @@ repository = "https://github.com/aprimadi/influxdb2"
 license = "MIT"
 edition = "2018"
 
-
 [features]
 default = ["native-tls"]
 native-tls = ["reqwest/native-tls"]
@@ -48,6 +47,5 @@ mockito = "0.26.0"
 num-traits = "0.2"
 once_cell = { version = "1.4.0", features = ["parking_lot"] }
 parking_lot = "0.11.1"
-tokio = { version = "1.18", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
 test_helpers = { path = "./test_helpers" }
-
