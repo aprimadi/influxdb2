@@ -184,6 +184,41 @@ impl Client {
         }
     }
 
+    /// Create client using additional pem encoded root ca cert 
+    pub fn new_root_ca_pem(
+        url:                   impl Into<String>,
+        org:                   impl Into<String>,
+        auth_token:            impl Into<String>,
+        root_ca_cert_path_pem: impl Into<String>,
+    ) -> Self {
+
+        let token = auth_token.into();
+        let auth_header = if token.is_empty() {
+            None
+        } else {
+            Some(format!("Token {}", token))
+        };
+
+        let url: String = url.into();
+        let base = Url::parse(&url).expect(&format!("Invalid url was provided: {}", &url));
+
+        let root_ca = root_ca_cert_path_pem.into();
+        let cert = std::fs::read(root_ca).unwrap();
+        let cert = reqwest::Certificate::from_pem(&cert).unwrap();
+        let client = reqwest::Client::builder()
+                .use_native_tls()
+                .add_root_certificate(cert)
+                .build();
+
+        Self {
+            base,
+            org: org.into(),
+            auth_header,
+            reqwest :  client.unwrap().into()
+        }
+    }
+
+
     /// Consolidate common request building code
     fn request(&self, method: Method, url: &str) -> reqwest::RequestBuilder {
         let mut req = self.reqwest.request(method, url);
