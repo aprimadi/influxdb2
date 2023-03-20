@@ -13,7 +13,7 @@ pub struct Dialect {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub delimiter: Option<String>,
     /// https://www.w3.org/TR/2015/REC-tabular-data-model-20151217/#columns
-    #[serde()]
+    // #[serde()]
     pub annotations: Vec<Annotations>,
     /// Character prefixed to comment strings
     #[serde(skip_serializing_if = "Option::is_none")]
