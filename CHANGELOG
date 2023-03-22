@@ -84,3 +84,9 @@
 =====
 
 - Added WriteDataPoint derive macro
+
+0.3.8
+=====
+
+- Fix build error with serde 1.0.157+
+
