@@ -12,8 +12,8 @@ use chrono::DateTime;
 use csv::StringRecord;
 use fallible_iterator::FallibleIterator;
 use go_parse_duration::parse_duration;
-use influxdb2_structmap::{FromMap, GenericMap};
 use influxdb2_structmap::value::Value;
+use influxdb2_structmap::{FromMap, GenericMap};
 use ordered_float::OrderedFloat;
 use reqwest::{Method, StatusCode};
 use snafu::ResultExt;
@@ -94,7 +94,7 @@ impl Client {
                     res.push(T::from_genericmap(item));
                 }
                 Ok(res)
-            },
+            }
             status => {
                 let text = response.text().await.context(ReqwestProcessing)?;
                 Http { status, text }.fail()?
@@ -158,6 +158,100 @@ impl Client {
             }
         }
     }
+
+    /// Returns bucket measurements
+    pub async fn list_measurements(&self, bucket: &str) -> Result<Vec<String>, RequestError> {
+        let req_url = self.url("/api/v2/query");
+        let query = Query::new(format!(
+            r#"import "influxdata/influxdb/schema"
+
+schema.measurements(bucket: "{bucket}") "#
+        ));
+        let body = serde_json::to_string(&query).context(Serializing)?;
+
+        let response = self
+            .request(Method::POST, &req_url)
+            .header("Accepting-Encoding", "identity")
+            .header("Content-Type", "application/json")
+            .query(&[("org", &self.org)])
+            .body(body)
+            .send()
+            .await
+            .context(ReqwestProcessing)?;
+
+        match response.status() {
+            StatusCode::OK => {
+                let text = response.text().await.unwrap();
+                let mut reader = csv::ReaderBuilder::new()
+                    .has_headers(true)
+                    .comment(Some(b'#'))
+                    .from_reader(text.as_bytes());
+
+                let mut res = vec![];
+                for item in reader.records().flatten() {
+                    if let Some(name) = item.get(3) {
+                        res.push(name.to_string());
+                    }
+                }
+                Ok(res)
+            }
+            status => {
+                let text = response.text().await.context(ReqwestProcessing)?;
+                Http { status, text }.fail()?
+            }
+        }
+    }
+
+    /// List a measurement's field keys
+    pub async fn list_measurement_field_keys(
+        &self,
+        bucket: &str,
+        measurement: &str,
+    ) -> Result<Vec<String>, RequestError> {
+        let req_url = self.url("/api/v2/query");
+        let query = Query::new(format!(
+            r#"import "influxdata/influxdb/schema"
+
+            schema.measurementFieldKeys(
+                bucket: "{bucket}",
+                measurement: "{measurement}",
+            )"#
+        ));
+
+        let body = serde_json::to_string(&query).context(Serializing)?;
+
+        let response = self
+            .request(Method::POST, &req_url)
+            .header("Accepting-Encoding", "identity")
+            .header("Content-Type", "application/json")
+            .query(&[("org", &self.org)])
+            .body(body)
+            .send()
+            .await
+            .context(ReqwestProcessing)?;
+
+        match response.status() {
+            StatusCode::OK => {
+                let text = response.text().await.unwrap();
+                let mut reader = csv::ReaderBuilder::new()
+                    .has_headers(true)
+                    .comment(Some(b'#'))
+                    .from_reader(text.as_bytes());
+
+                let mut res = vec![];
+                for item in reader.records().flatten() {
+                    if let Some(name) = item.get(3) {
+                        res.push(name.to_string());
+                    }
+                }
+                Ok(res)
+            }
+            status => {
+                let text = response.text().await.context(ReqwestProcessing)?;
+                Http { status, text }.fail()?
+            }
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -177,53 +271,53 @@ impl FromStr for DataType {
 
     fn from_str(input: &str) -> Result<DataType, RequestError> {
         match input {
-            "string"                => Ok(DataType::String),
-            "double"                => Ok(DataType::Double),
-            "boolean"               => Ok(DataType::Bool),
-            "long"                  => Ok(DataType::Long),
-            "unsignedLong"          => Ok(DataType::UnsignedLong),
-            "duration"              => Ok(DataType::Duration),
-            "base64Binary"          => Ok(DataType::Base64Binary),
-            "dateTime:RFC3339"      => Ok(DataType::TimeRFC),
-            "dateTime:RFC3339Nano"  => Ok(DataType::TimeRFC),
-            _ => Err(RequestError::Deserializing { 
-                text: format!("unknown datatype: {}", input)
-            })
+            "string" => Ok(DataType::String),
+            "double" => Ok(DataType::Double),
+            "boolean" => Ok(DataType::Bool),
+            "long" => Ok(DataType::Long),
+            "unsignedLong" => Ok(DataType::UnsignedLong),
+            "duration" => Ok(DataType::Duration),
+            "base64Binary" => Ok(DataType::Base64Binary),
+            "dateTime:RFC3339" => Ok(DataType::TimeRFC),
+            "dateTime:RFC3339Nano" => Ok(DataType::TimeRFC),
+            _ => Err(RequestError::Deserializing {
+                text: format!("unknown datatype: {}", input),
+            }),
         }
     }
 }
 
 struct FluxColumn {
-	name:           String,
-	data_type:      DataType,
-	group:          bool,
-	default_value:  String,
+    name: String,
+    data_type: DataType,
+    group: bool,
+    default_value: String,
 }
 
 /// Represents a flux record returned from a query.
 #[derive(Clone, Debug, PartialEq)]
 pub struct FluxRecord {
-    table:  i32,
+    table: i32,
     values: GenericMap,
 }
 
 struct FluxTableMetadata {
-    position:   i32,
-    columns:    Vec<FluxColumn>,
+    position: i32,
+    columns: Vec<FluxColumn>,
 }
 
 struct QueryTableResult<'a> {
-    csv_reader:     csv::Reader<&'a [u8]>,
+    csv_reader: csv::Reader<&'a [u8]>,
     table_position: i32,
-    table_changed:  bool,
-    table:          Option<FluxTableMetadata>,
+    table_changed: bool,
+    table: Option<FluxTableMetadata>,
 }
 
 #[derive(PartialEq)]
 enum ParsingState {
     Normal,
-	Annotation,
-	Error,
+    Annotation,
+    Error,
 }
 
 impl<'a> QueryTableResult<'a> {
@@ -255,16 +349,16 @@ impl<'a> FallibleIterator for QueryTableResult<'a> {
         loop {
             if !self.csv_reader.read_record(&mut row).unwrap() {
                 // EOF
-                return Ok(None)
+                return Ok(None);
             }
             if row.len() <= 1 {
-                continue
+                continue;
             }
             if let Some(s) = row.get(0) {
                 if s.len() > 0 && s.chars().nth(0).unwrap() == '#' {
                     // Finding new table, prepare for annotation parsing
                     if parsing_state == ParsingState::Normal {
-                        self.table = Some(FluxTableMetadata { 
+                        self.table = Some(FluxTableMetadata {
                             position: self.table_position,
                             columns: Vec::new(),
                         });
@@ -283,18 +377,18 @@ impl<'a> FallibleIterator for QueryTableResult<'a> {
                 }
             }
             if self.table.is_none() {
-                return Err(RequestError::Deserializing { 
-                    text: String::from("annotations not found") 
-                })
+                return Err(RequestError::Deserializing {
+                    text: String::from("annotations not found"),
+                });
             }
-            if row.len()-1 != self.table.as_ref().unwrap().columns.len() {
+            if row.len() - 1 != self.table.as_ref().unwrap().columns.len() {
                 return Err(RequestError::Deserializing {
                     text: format!(
-                        "row has different number of columns than the table: {} vs {}", 
-                        row.len() - 1, 
+                        "row has different number of columns than the table: {} vs {}",
+                        row.len() - 1,
                         self.table.as_ref().unwrap().columns.len(),
-                    )
-                })
+                    ),
+                });
             }
             if let Some(s) = row.get(0) {
                 match s {
@@ -304,14 +398,15 @@ impl<'a> FallibleIterator for QueryTableResult<'a> {
                                 // Parse column name (csv header)
                                 if !data_type_annotation_found {
                                     return Err(RequestError::Deserializing {
-                                        text: String::from("datatype annotation not found")
-                                    })
+                                        text: String::from("datatype annotation not found"),
+                                    });
                                 }
                                 if row.get(1).unwrap() == "error" {
                                     parsing_state = ParsingState::Error;
                                 } else {
                                     for i in 1..row.len() {
-                                        let column = &mut self.table.as_mut().unwrap().columns[i-1];
+                                        let column =
+                                            &mut self.table.as_mut().unwrap().columns[i - 1];
                                         column.name = String::from(row.get(i).unwrap());
                                     }
                                     parsing_state = ParsingState::Normal;
@@ -330,27 +425,23 @@ impl<'a> FallibleIterator for QueryTableResult<'a> {
                                     reference = format!(",{}", s);
                                 }
                                 return Err(RequestError::Deserializing {
-                                    text: format!("{}{}", msg, reference)
+                                    text: format!("{}{}", msg, reference),
                                 });
                             }
                             _ => {}
                         }
                         let mut values = BTreeMap::new();
                         for i in 1..row.len() {
-                            let column = &self.table.as_mut().unwrap().columns[i-1];
+                            let column = &self.table.as_mut().unwrap().columns[i - 1];
                             let mut v = row.get(i).unwrap();
                             if v == "" {
                                 v = &column.default_value[..];
                             }
-                            let value = parse_value(
-                                v,
-                                column.data_type,
-                                &column.name[..],
-                            )?;
+                            let value = parse_value(v, column.data_type, &column.name[..])?;
                             values.entry(column.name.clone()).or_insert(value);
                         }
-                        record = FluxRecord { 
-                            table: self.table.as_ref().unwrap().position, 
+                        record = FluxRecord {
+                            table: self.table.as_ref().unwrap().position,
                             values,
                         };
                         break;
@@ -358,26 +449,26 @@ impl<'a> FallibleIterator for QueryTableResult<'a> {
                     "#datatype" => {
                         data_type_annotation_found = true;
                         for i in 1..row.len() {
-                            let column = &mut self.table.as_mut().unwrap().columns[i-1];
+                            let column = &mut self.table.as_mut().unwrap().columns[i - 1];
                             let dt = DataType::from_str(row.get(i).unwrap())?;
                             column.data_type = dt;
                         }
                     }
                     "#group" => {
                         for i in 1..row.len() {
-                            let column = &mut self.table.as_mut().unwrap().columns[i-1];
+                            let column = &mut self.table.as_mut().unwrap().columns[i - 1];
                             column.group = row.get(i).unwrap() == "true";
                         }
                     }
                     "#default" => {
                         for i in 1..row.len() {
-                            let column = &mut self.table.as_mut().unwrap().columns[i-1];
+                            let column = &mut self.table.as_mut().unwrap().columns[i - 1];
                             column.default_value = String::from(row.get(i).unwrap());
                         }
                     }
-                    _ => { 
+                    _ => {
                         return Err(RequestError::Deserializing {
-                            text: format!("invalid first cell: {}", s)
+                            text: format!("invalid first cell: {}", s),
                         });
                     }
                 }
@@ -396,16 +487,13 @@ impl QueryResult {
         // Parse items
         let mut items = vec![];
         let mut build_table = HashMap::<GenericMap, GenericMap>::new();
-        let blacklist = vec![
-            "_field".to_owned(),
-            "_value".to_owned(),
-            "table".to_owned(),
-        ];
+        let blacklist = vec!["_field".to_owned(), "_value".to_owned(), "table".to_owned()];
         let blacklist: HashSet<String> = blacklist.into_iter().collect();
         let mut key_order: Vec<GenericMap> = vec![];
         for record in qtr.iterator() {
             let mut map = record?.values;
-            
+            dbg! {&map};
+
             let mut key = map.clone();
             key.retain(|k, _| !blacklist.contains(k));
 
@@ -444,18 +532,14 @@ impl QueryResult {
             items.push(entry.clone());
         }
 
-        let res = Self {
-            items,
-        };
+        let res = Self { items };
         Ok(res)
     }
 }
 
 fn parse_value(s: &str, t: DataType, name: &str) -> Result<Value, RequestError> {
     match t {
-        DataType::String => {
-            Ok(Value::String(String::from(s)))
-        }
+        DataType::String => Ok(Value::String(String::from(s))),
         DataType::Double => {
             let v = s.parse::<f64>().unwrap();
             Ok(Value::Double(OrderedFloat::from(v)))
@@ -475,14 +559,12 @@ fn parse_value(s: &str, t: DataType, name: &str) -> Result<Value, RequestError> 
             let v = s.parse::<u64>().unwrap();
             Ok(Value::UnsignedLong(v))
         }
-        DataType::Duration => {
-            match parse_duration(s) {
-                Ok(d) => Ok(Value::Duration(chrono::Duration::nanoseconds(d))),
-                Err(_) => Err(RequestError::Deserializing {
-                    text: format!("invalid duration: {}, name: {}", s, name)
-                }),
-            }
-        }
+        DataType::Duration => match parse_duration(s) {
+            Ok(d) => Ok(Value::Duration(chrono::Duration::nanoseconds(d))),
+            Err(_) => Err(RequestError::Deserializing {
+                text: format!("invalid duration: {}, name: {}", s, name),
+            }),
+        },
         DataType::Base64Binary => {
             let b = decode(s).unwrap();
             Ok(Value::Base64Binary(b))
@@ -501,7 +583,7 @@ mod tests {
     use mockito::{mock, Matcher};
 
     #[derive(FromDataPoint)]
-    struct Empty { }
+    struct Empty {}
     impl Default for Empty {
         fn default() -> Self {
             Self {}
@@ -691,35 +773,91 @@ mod tests {
 ";
         let qtr = QueryTableResult::new(text);
         let expected: [FluxRecord; 2] = [
-            FluxRecord { 
-                table: 0, 
+            FluxRecord {
+                table: 0,
                 values: [
-                    (String::from("result"), Value::String(String::from("_result"))),
+                    (
+                        String::from("result"),
+                        Value::String(String::from("_result")),
+                    ),
                     (String::from("table"), Value::Long(0)),
-                    (String::from("_start"), parse_value("2020-02-17T22:19:49.747562847Z", DataType::TimeRFC, "_start").unwrap()),
-                    (String::from("_stop"), parse_value("2020-02-18T22:19:49.747562847Z", DataType::TimeRFC, "_stop").unwrap()),
-                    (String::from("_time"), parse_value("2020-02-18T10:34:08.135814545Z", DataType::TimeRFC, "_time").unwrap()),
+                    (
+                        String::from("_start"),
+                        parse_value(
+                            "2020-02-17T22:19:49.747562847Z",
+                            DataType::TimeRFC,
+                            "_start",
+                        )
+                        .unwrap(),
+                    ),
+                    (
+                        String::from("_stop"),
+                        parse_value("2020-02-18T22:19:49.747562847Z", DataType::TimeRFC, "_stop")
+                            .unwrap(),
+                    ),
+                    (
+                        String::from("_time"),
+                        parse_value("2020-02-18T10:34:08.135814545Z", DataType::TimeRFC, "_time")
+                            .unwrap(),
+                    ),
                     (String::from("_field"), Value::String(String::from("f"))),
-                    (String::from("_measurement"), Value::String(String::from("test"))),
-                    (String::from("_value"), Value::Double(OrderedFloat::from(1.4))),
+                    (
+                        String::from("_measurement"),
+                        Value::String(String::from("test")),
+                    ),
+                    (
+                        String::from("_value"),
+                        Value::Double(OrderedFloat::from(1.4)),
+                    ),
                     (String::from("a"), Value::String(String::from("1"))),
                     (String::from("b"), Value::String(String::from("adsfasdf"))),
-                ].iter().cloned().collect(),
+                ]
+                .iter()
+                .cloned()
+                .collect(),
             },
-            FluxRecord { 
-                table: 0, 
+            FluxRecord {
+                table: 0,
                 values: [
-                    (String::from("result"), Value::String(String::from("_result"))),
+                    (
+                        String::from("result"),
+                        Value::String(String::from("_result")),
+                    ),
                     (String::from("table"), Value::Long(0)),
-                    (String::from("_start"), parse_value("2020-02-17T22:19:49.747562847Z", DataType::TimeRFC, "_start").unwrap()),
-                    (String::from("_stop"), parse_value("2020-02-18T22:19:49.747562847Z", DataType::TimeRFC, "_stop").unwrap()),
-                    (String::from("_time"), parse_value("2020-02-18T22:08:44.850214724Z", DataType::TimeRFC, "_time").unwrap()),
+                    (
+                        String::from("_start"),
+                        parse_value(
+                            "2020-02-17T22:19:49.747562847Z",
+                            DataType::TimeRFC,
+                            "_start",
+                        )
+                        .unwrap(),
+                    ),
+                    (
+                        String::from("_stop"),
+                        parse_value("2020-02-18T22:19:49.747562847Z", DataType::TimeRFC, "_stop")
+                            .unwrap(),
+                    ),
+                    (
+                        String::from("_time"),
+                        parse_value("2020-02-18T22:08:44.850214724Z", DataType::TimeRFC, "_time")
+                            .unwrap(),
+                    ),
                     (String::from("_field"), Value::String(String::from("f"))),
-                    (String::from("_measurement"), Value::String(String::from("test"))),
-                    (String::from("_value"), Value::Double(OrderedFloat::from(6.6))),
+                    (
+                        String::from("_measurement"),
+                        Value::String(String::from("test")),
+                    ),
+                    (
+                        String::from("_value"),
+                        Value::Double(OrderedFloat::from(6.6)),
+                    ),
                     (String::from("a"), Value::String(String::from("1"))),
                     (String::from("b"), Value::String(String::from("adsfasdf"))),
-                ].iter().cloned().collect(),
+                ]
+                .iter()
+                .cloned()
+                .collect(),
             },
         ];
         let mut i = 0;
@@ -736,4 +874,3 @@ mod tests {
         }
     }
 }
-
