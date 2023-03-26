@@ -187,13 +187,7 @@ schema.measurements(bucket: "{bucket}") "#
                     .comment(Some(b'#'))
                     .from_reader(text.as_bytes());
 
-                let mut res = vec![];
-                for item in reader.records().flatten() {
-                    if let Some(name) = item.get(3) {
-                        res.push(name.to_string());
-                    }
-                }
-                Ok(res)
+                Ok(reader.records().into_iter().flatten().map(|r| r.get(3).map(|s| s.to_owned())).flatten().collect())
             }
             status => {
                 let text = response.text().await.context(ReqwestProcessing)?;
@@ -238,13 +232,7 @@ schema.measurements(bucket: "{bucket}") "#
                     .comment(Some(b'#'))
                     .from_reader(text.as_bytes());
 
-                let mut res = vec![];
-                for item in reader.records().flatten() {
-                    if let Some(name) = item.get(3) {
-                        res.push(name.to_string());
-                    }
-                }
-                Ok(res)
+                Ok(reader.records().into_iter().flatten().map(|r| r.get(3).map(|s| s.to_owned())).flatten().collect())
             }
             status => {
                 let text = response.text().await.context(ReqwestProcessing)?;
