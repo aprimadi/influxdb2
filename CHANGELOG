@@ -90,3 +90,9 @@
 
 - Fix build error with serde 1.0.157+
 
+0.3.9
+=====
+
+- Add explore schema query support: list measurements
+- Add explore schema query support: list fields
+- Add explore schema query support: list tag values
