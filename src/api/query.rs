@@ -94,7 +94,7 @@ impl Client {
                     res.push(T::from_genericmap(item));
                 }
                 Ok(res)
-            },
+            }
             status => {
                 let text = response.text().await.context(ReqwestProcessing)?;
                 Http { status, text }.fail()?
@@ -315,7 +315,7 @@ impl FromStr for DataType {
             "base64Binary"          => Ok(DataType::Base64Binary),
             "dateTime:RFC3339"      => Ok(DataType::TimeRFC),
             "dateTime:RFC3339Nano"  => Ok(DataType::TimeRFC),
-            _ => Err(RequestError::Deserializing { 
+            _ => Err(RequestError::Deserializing {
                 text: format!("unknown datatype: {}", input)
             })
         }
@@ -393,7 +393,7 @@ impl<'a> FallibleIterator for QueryTableResult<'a> {
                 if s.len() > 0 && s.chars().nth(0).unwrap() == '#' {
                     // Finding new table, prepare for annotation parsing
                     if parsing_state == ParsingState::Normal {
-                        self.table = Some(FluxTableMetadata { 
+                        self.table = Some(FluxTableMetadata {
                             position: self.table_position,
                             columns: Vec::new(),
                         });
@@ -412,15 +412,15 @@ impl<'a> FallibleIterator for QueryTableResult<'a> {
                 }
             }
             if self.table.is_none() {
-                return Err(RequestError::Deserializing { 
-                    text: String::from("annotations not found") 
+                return Err(RequestError::Deserializing {
+                    text: String::from("annotations not found")
                 })
             }
             if row.len()-1 != self.table.as_ref().unwrap().columns.len() {
                 return Err(RequestError::Deserializing {
                     text: format!(
-                        "row has different number of columns than the table: {} vs {}", 
-                        row.len() - 1, 
+                        "row has different number of columns than the table: {} vs {}",
+                        row.len() - 1,
                         self.table.as_ref().unwrap().columns.len(),
                     )
                 })
@@ -478,8 +478,8 @@ impl<'a> FallibleIterator for QueryTableResult<'a> {
                             )?;
                             values.entry(column.name.clone()).or_insert(value);
                         }
-                        record = FluxRecord { 
-                            table: self.table.as_ref().unwrap().position, 
+                        record = FluxRecord {
+                            table: self.table.as_ref().unwrap().position,
                             values,
                         };
                         break;
@@ -504,7 +504,7 @@ impl<'a> FallibleIterator for QueryTableResult<'a> {
                             column.default_value = String::from(row.get(i).unwrap());
                         }
                     }
-                    _ => { 
+                    _ => {
                         return Err(RequestError::Deserializing {
                             text: format!("invalid first cell: {}", s)
                         });
@@ -534,7 +534,7 @@ impl QueryResult {
         let mut key_order: Vec<GenericMap> = vec![];
         for record in qtr.iterator() {
             let mut map = record?.values;
-            
+
             let mut key = map.clone();
             key.retain(|k, _| !blacklist.contains(k));
 
@@ -820,8 +820,8 @@ mod tests {
 ";
         let qtr = QueryTableResult::new(text);
         let expected: [FluxRecord; 2] = [
-            FluxRecord { 
-                table: 0, 
+            FluxRecord {
+                table: 0,
                 values: [
                     (String::from("result"), Value::String(String::from("_result"))),
                     (String::from("table"), Value::Long(0)),
@@ -835,8 +835,8 @@ mod tests {
                     (String::from("b"), Value::String(String::from("adsfasdf"))),
                 ].iter().cloned().collect(),
             },
-            FluxRecord { 
-                table: 0, 
+            FluxRecord {
+                table: 0,
                 values: [
                     (String::from("result"), Value::String(String::from("_result"))),
                     (String::from("table"), Value::Long(0)),
@@ -865,4 +865,3 @@ mod tests {
         }
     }
 }
-
