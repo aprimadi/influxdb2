@@ -158,6 +158,100 @@ impl Client {
             }
         }
     }
+
+    /// Returns bucket measurements
+    pub async fn list_measurements(&self, bucket: &str) -> Result<Vec<String>, RequestError> {
+        let req_url = self.url("/api/v2/query");
+        let query = Query::new(format!(
+            r#"import "influxdata/influxdb/schema"
+
+schema.measurements(bucket: "{bucket}") "#
+        ));
+        let body = serde_json::to_string(&query).context(Serializing)?;
+
+        let response = self
+            .request(Method::POST, &req_url)
+            .header("Accepting-Encoding", "identity")
+            .header("Content-Type", "application/json")
+            .query(&[("org", &self.org)])
+            .body(body)
+            .send()
+            .await
+            .context(ReqwestProcessing)?;
+
+        match response.status() {
+            StatusCode::OK => {
+                let text = response.text().await.unwrap();
+                let mut reader = csv::ReaderBuilder::new()
+                    .has_headers(true)
+                    .comment(Some(b'#'))
+                    .from_reader(text.as_bytes());
+
+                let mut res = vec![];
+                for item in reader.records().flatten() {
+                    if let Some(name) = item.get(3) {
+                        res.push(name.to_string());
+                    }
+                }
+                Ok(res)
+            }
+            status => {
+                let text = response.text().await.context(ReqwestProcessing)?;
+                Http { status, text }.fail()?
+            }
+        }
+    }
+
+    /// List a measurement's field keys
+    pub async fn list_measurement_field_keys(
+        &self,
+        bucket: &str,
+        measurement: &str,
+    ) -> Result<Vec<String>, RequestError> {
+        let req_url = self.url("/api/v2/query");
+        let query = Query::new(format!(
+            r#"import "influxdata/influxdb/schema"
+
+            schema.measurementFieldKeys(
+                bucket: "{bucket}",
+                measurement: "{measurement}",
+            )"#
+        ));
+
+        let body = serde_json::to_string(&query).context(Serializing)?;
+
+        let response = self
+            .request(Method::POST, &req_url)
+            .header("Accepting-Encoding", "identity")
+            .header("Content-Type", "application/json")
+            .query(&[("org", &self.org)])
+            .body(body)
+            .send()
+            .await
+            .context(ReqwestProcessing)?;
+
+        match response.status() {
+            StatusCode::OK => {
+                let text = response.text().await.unwrap();
+                let mut reader = csv::ReaderBuilder::new()
+                    .has_headers(true)
+                    .comment(Some(b'#'))
+                    .from_reader(text.as_bytes());
+
+                let mut res = vec![];
+                for item in reader.records().flatten() {
+                    if let Some(name) = item.get(3) {
+                        res.push(name.to_string());
+                    }
+                }
+                Ok(res)
+            }
+            status => {
+                let text = response.text().await.context(ReqwestProcessing)?;
+                Http { status, text }.fail()?
+            }
+        }
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
