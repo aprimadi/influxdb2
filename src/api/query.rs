@@ -102,6 +102,41 @@ impl Client {
         }
     }
 
+    /// Query Raw
+    pub async fn query_raw(
+        &self,
+        query: Option<Query>,
+    ) -> Result<Vec<FluxRecord>, RequestError> {
+        let req_url = self.url("/api/v2/query");
+        let body = serde_json::to_string(&query.unwrap_or_default()).context(Serializing)?;
+
+        let response = self
+            .request(Method::POST, &req_url)
+            .header("Accepting-Encoding", "identity")
+            .header("Content-Type", "application/json")
+            .query(&[("org", &self.org)])
+            .body(body)
+            .send()
+            .await
+            .context(ReqwestProcessing)?;
+
+        match response.status() {
+            StatusCode::OK => {
+                let text = response.text().await.unwrap();
+                let qtr = QueryTableResult::new(&text[..]);
+                let mut records = vec![];
+                for record in qtr.iterator() {
+                    records.push(record?);
+                }
+                Ok(records)
+            }
+            status => {
+                let text = response.text().await.context(ReqwestProcessing)?;
+                Http { status, text }.fail()?
+            }
+        }
+    }
+
     /// Analyze Query
     pub async fn query_analyze(
         &self,
