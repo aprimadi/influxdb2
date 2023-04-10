@@ -96,3 +96,8 @@
 - Add explore schema query support: list measurements
 - Add explore schema query support: list fields
 - Add explore schema query support: list tag values
+
+0.4.0
+=====
+
+- Added raw query support
