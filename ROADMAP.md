@@ -3,4 +3,4 @@
 ## 0.4
 
 - [x] Support ToDataPoint derive macro
-- [ ] Implement raw query support [Issue 31](https://github.com/aprimadi/influxdb2/issues/31)
+- [x] Implement raw query support [Issue 31](https://github.com/aprimadi/influxdb2/issues/31)
