@@ -522,61 +522,60 @@ struct QueryResult {
 
 impl QueryResult {
     fn new<'a>(qtr: QueryTableResult<'a>) -> Result<Self, RequestError> {
-        // Parse items
-        let mut items = vec![];
+        let ignored_keys = vec!["_field", "_value", "table"];
+        let ignored_keys: HashSet<&str> = ignored_keys.into_iter().collect();
+
+        // Construct build table, this groups values with the same tags and
+        // timestamp but in different table.
+        //
+        // We need to do this because influxdb v2 stores multiple fields in
+        // different tables even though it's part of the same measurement.
         let mut build_table = HashMap::<GenericMap, GenericMap>::new();
-        let blacklist = vec![
-            "_field".to_owned(),
-            "_value".to_owned(),
-            "table".to_owned(),
-        ];
-        let blacklist: HashSet<String> = blacklist.into_iter().collect();
         let mut key_order: Vec<GenericMap> = vec![];
         for record in qtr.iterator() {
-            let mut map = record?.values;
+            let mut record_values = record?.values;
 
-            let mut key = map.clone();
-            key.retain(|k, _| !blacklist.contains(k));
+            // Construct key
+            let mut key = record_values.clone();
+            key.retain(|k, _| !ignored_keys.contains(k.as_str()));
 
             match build_table.get_mut(&key) {
                 Some(entry) => {
                     // Set field value
                     let field;
-                    if let Value::String(f) = map.get("_field").unwrap() {
+                    if let Value::String(f) = record_values.get("_field").unwrap() {
                         field = f.clone();
                     } else {
-                        panic!("");
+                        unreachable!();
                     }
-                    let value = map.get("_value").unwrap();
+                    let value = record_values.get("_value").unwrap();
                     entry.insert(field, value.clone());
                 }
                 None => {
                     // Set field value
                     let field;
-                    if let Value::String(f) = map.get("_field").unwrap() {
+                    if let Value::String(f) = record_values.get("_field").unwrap() {
                         field = f.clone();
                     } else {
-                        panic!("");
+                        unreachable!();
                     }
-                    let value = map.get("_value").unwrap();
-                    map.insert(field, value.clone());
+                    let value = record_values.get("_value").unwrap();
+                    record_values.insert(field, value.clone());
 
-                    build_table.insert(key.clone(), map);
+                    build_table.insert(key.clone(), record_values);
                     key_order.push(key);
                 }
             }
         }
 
         // Build items based on the order the `key` is inserted
+        let mut items = vec![];
         for key in key_order {
             let entry = build_table.get(&key).unwrap();
             items.push(entry.clone());
         }
 
-        let res = Self {
-            items,
-        };
-        Ok(res)
+        Ok(Self { items })
     }
 }
 
