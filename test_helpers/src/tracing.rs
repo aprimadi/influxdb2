@@ -1,6 +1,7 @@
 //! Utilities for testing tracing
 use std::{fmt, sync::Arc};
 
+use parking_lot::Mutex;
 use tracing::{
     self,
     field::Field,
@@ -8,7 +9,6 @@ use tracing::{
     subscriber::{DefaultGuard, Subscriber},
     Event,
 };
-use parking_lot::Mutex;
 
 /// This struct captures tracing `Event`s as strings, and can be used
 /// to verify that messages are making it to logs correctly

@@ -1,7 +1,7 @@
 //! Query
 
-use crate::models::ast::Package;
 use crate::models::ast::dialect::Annotations;
+use crate::models::ast::Package;
 use crate::models::File;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -35,7 +35,7 @@ impl Query {
         }
     }
 }
-    
+
 impl Default for Query {
     fn default() -> Self {
         Self {
@@ -43,7 +43,11 @@ impl Default for Query {
             query: String::from(""),
             r#type: None,
             dialect: Some(crate::models::ast::Dialect {
-                annotations: vec![Annotations::Datatype, Annotations::Group, Annotations::Default],
+                annotations: vec![
+                    Annotations::Datatype,
+                    Annotations::Group,
+                    Annotations::Default,
+                ],
                 ..Default::default()
             }),
             now: None,

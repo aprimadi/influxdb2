@@ -1,4 +1,3 @@
-
 //! Task
 
 use serde::{Deserialize, Serialize};
@@ -37,7 +36,7 @@ pub struct Task {
     /// The type of task, this can be used for filtering tasks on list actions.
     #[serde(rename = "type")]
     pub type_: Option<String>,
-    /// The ID of the authorization used when this task communicates with the 
+    /// The ID of the authorization used when this task communicates with the
     /// query engine
     #[serde(rename = "authorizationID")]
     pub authorization_id: Option<String>,
@@ -53,7 +52,7 @@ pub struct Task {
     pub last_run_status: Option<String>,
     /// Timestamp of latest scheduled, completed run, RFC3339
     pub latest_completed: Option<String>,
-    /// Duration to delay after the schedule, before executing the task; 
+    /// Duration to delay after the schedule, before executing the task;
     /// parsed from flux
     pub offset: Option<String>,
     /// Links
@@ -113,4 +112,3 @@ mod tests {
         assert_eq!(v, "\"inactive\"");
     }
 }
-

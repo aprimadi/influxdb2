@@ -26,8 +26,8 @@ pub mod retention_rule;
 pub use self::retention_rule::RetentionRule;
 pub mod query;
 pub use self::query::{
-    AnalyzeQueryResponse, AnalyzeQueryResponseErrors, AstResponse, 
-    FluxSuggestion, FluxSuggestions, LanguageRequest, Query,
+    AnalyzeQueryResponse, AnalyzeQueryResponseErrors, AstResponse, FluxSuggestion, FluxSuggestions,
+    LanguageRequest, Query,
 };
 pub mod file;
 pub use self::file::File;
@@ -36,5 +36,4 @@ pub use self::health::{HealthCheck, Status};
 pub mod data_point;
 pub use data_point::{DataPoint, FieldValue, WriteDataPoint};
 pub mod task;
-pub use task::{Task, Tasks, TaskStatusType};
-
+pub use task::{Task, TaskStatusType, Tasks};
