@@ -197,7 +197,7 @@ cpu,host=server01 usage=0.5 1671095854
                 .field("usage", 0.5)
                 .timestamp(1671095854)
                 .build()
-                .unwrap()
+                .unwrap(),
         ];
 
         // If the requests made are incorrect, Mockito returns status 501 and `write`

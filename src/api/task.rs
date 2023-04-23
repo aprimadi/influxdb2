@@ -4,15 +4,12 @@ use reqwest::Method;
 use serde::{Deserialize, Serialize};
 use snafu::ResultExt;
 
+use crate::models::{TaskStatusType, Tasks};
 use crate::{Client, Http, RequestError, ReqwestProcessing, Serializing};
-use crate::models::{Tasks, TaskStatusType};
 
 impl Client {
     /// List all tasks.
-    pub async fn list_tasks(
-        &self,
-        request: ListTasksRequest,
-    ) -> Result<Tasks, RequestError> {
+    pub async fn list_tasks(&self, request: ListTasksRequest) -> Result<Tasks, RequestError> {
         let qs = serde_qs::to_string(&request).unwrap();
         let mut endpoint = "/api/v2/tasks".to_owned();
         if !qs.is_empty() {
@@ -34,25 +31,16 @@ impl Client {
             return res;
         }
 
-        let res = response
-            .json::<Tasks>()
-            .await
-            .context(ReqwestProcessing)?;
+        let res = response.json::<Tasks>().await.context(ReqwestProcessing)?;
         Ok(res)
     }
 
     /// Create a new task.
-    pub async fn create_task(
-        &self,
-        request: CreateTaskRequest,
-    ) -> Result<(), RequestError> {
+    pub async fn create_task(&self, request: CreateTaskRequest) -> Result<(), RequestError> {
         let url = self.url("/api/v2/tasks");
         let response = self
             .request(Method::POST, &url)
-            .body(
-                serde_json::to_string(&request)
-                    .context(Serializing)?,
-            )
+            .body(serde_json::to_string(&request).context(Serializing)?)
             .send()
             .await
             .context(ReqwestProcessing)?;
@@ -138,4 +126,3 @@ impl CreateTaskRequest {
         }
     }
 }
-

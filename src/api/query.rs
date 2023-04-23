@@ -386,8 +386,8 @@ struct QueryTableResult<'a> {
 #[derive(PartialEq)]
 enum ParsingState {
     Normal,
-	Annotation,
-	Error,
+    Annotation,
+    Error,
 }
 
 impl<'a> QueryTableResult<'a> {
@@ -422,7 +422,7 @@ impl<'a> FallibleIterator for QueryTableResult<'a> {
                 return Ok(None)
             }
             if row.len() <= 1 {
-                continue
+                continue;
             }
             if let Some(s) = row.get(0) {
                 if s.len() > 0 && s.chars().nth(0).unwrap() == '#' {
