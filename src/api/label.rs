@@ -118,7 +118,7 @@ impl Client {
 
     /// Delete a Label
     pub async fn delete_label(&self, label_id: &str) -> Result<(), RequestError> {
-        let delete_label_url  = self.url(&format!("/api/v2/labels/{}", label_id));
+        let delete_label_url = self.url(&format!("/api/v2/labels/{}", label_id));
         let response = self
             .request(Method::DELETE, &delete_label_url)
             .send()

@@ -1,7 +1,7 @@
 //! Buckets API
 
 use reqwest::Method;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 use snafu::ResultExt;
 
 use crate::models::{Buckets, PostBucketRequest};
@@ -86,7 +86,7 @@ impl Client {
         Ok(())
     }
 }
- 
+
 /// Request for list buckets API
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -146,4 +146,3 @@ mod tests {
         assert_eq!(serde_qs::to_string(&request).unwrap(), "");
     }
 }
-

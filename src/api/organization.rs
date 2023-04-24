@@ -20,20 +20,20 @@ impl Client {
             endpoint.push_str(&qs);
         }
         let url = self.url(&endpoint);
-        
+
         let response = self
             .request(Method::GET, &url)
             .send()
             .await
             .context(ReqwestProcessing)?;
-        
+
         if !response.status().is_success() {
             let status = response.status();
             let text = response.text().await.context(ReqwestProcessing)?;
             let res = Http { status, text }.fail();
             return res;
         }
-        
+
         let res = response
             .json::<Organizations>()
             .await
@@ -72,13 +72,13 @@ impl ListOrganizationRequest {
 #[cfg(test)]
 mod tests {
     use super::*;
-    
+
     #[test]
     fn serialize_list_organization_request() {
         let req = ListOrganizationRequest::new();
         let qs = serde_qs::to_string(&req).unwrap();
         assert_eq!(qs, "");
-        
+
         let mut req = ListOrganizationRequest::new();
         req.org = Some("Sahamee".to_owned());
         let qs = serde_qs::to_string(&req).unwrap();

@@ -3,8 +3,8 @@ use influxdb2_derive::FromDataPoint;
 #[derive(FromDataPoint)]
 struct StockPrice {
     ticker: String,
-    price:  u64,
-    time:   chrono::DateTime<chrono::FixedOffset>,
+    price: u64,
+    time: chrono::DateTime<chrono::FixedOffset>,
 }
 
 impl Default for StockPrice {
@@ -18,4 +18,3 @@ impl Default for StockPrice {
 }
 
 fn main() {}
-
