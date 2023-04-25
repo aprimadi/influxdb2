@@ -1,5 +1,5 @@
-use influxdb2::FromDataPoint;
 use influxdb2::models::{LanguageRequest, Query};
+use influxdb2::FromDataPoint;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -35,4 +35,3 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
-

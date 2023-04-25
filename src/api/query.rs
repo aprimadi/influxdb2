@@ -12,8 +12,8 @@ use chrono::DateTime;
 use csv::StringRecord;
 use fallible_iterator::FallibleIterator;
 use go_parse_duration::parse_duration;
-use influxdb2_structmap::{FromMap, GenericMap};
 use influxdb2_structmap::value::Value;
+use influxdb2_structmap::{FromMap, GenericMap};
 use ordered_float::OrderedFloat;
 use reqwest::{Method, StatusCode};
 use snafu::ResultExt;
@@ -103,10 +103,7 @@ impl Client {
     }
 
     /// Query Raw
-    pub async fn query_raw(
-        &self,
-        query: Option<Query>,
-    ) -> Result<Vec<FluxRecord>, RequestError> {
+    pub async fn query_raw(&self, query: Option<Query>) -> Result<Vec<FluxRecord>, RequestError> {
         let req_url = self.url("/api/v2/query");
         let body = serde_json::to_string(&query.unwrap_or_default()).context(Serializing)?;
 

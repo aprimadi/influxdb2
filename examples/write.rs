@@ -40,7 +40,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     ];
 
     client.write(bucket, stream::iter(points)).await?;
-    
+
     Ok(())
 }
-

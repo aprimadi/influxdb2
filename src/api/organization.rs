@@ -4,8 +4,8 @@ use reqwest::Method;
 use serde::{Deserialize, Serialize};
 use snafu::ResultExt;
 
-use crate::{Client, Http, RequestError, ReqwestProcessing};
 use crate::models::Organizations;
+use crate::{Client, Http, RequestError, ReqwestProcessing};
 
 impl Client {
     /// List all organizations.

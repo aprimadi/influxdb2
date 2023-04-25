@@ -13,15 +13,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
     println!("measurements: {:?}", measurements);
 
     for m in measurements.iter() {
-        let field_keys = client.list_measurement_field_keys(bucket, &m).await
+        let field_keys = client
+            .list_measurement_field_keys(bucket, &m)
+            .await
             .unwrap();
         println!("field keys: {:?}", field_keys);
     }
 
     for m in measurements.iter() {
-        let tag_values = client
-            .list_measurement_tag_values(bucket, &m, "host")
-            .await;
+        let tag_values = client.list_measurement_tag_values(bucket, &m, "host").await;
         println!(
             "tag values for measurement {} and tag {}: {:?}",
             &m, "host", tag_values

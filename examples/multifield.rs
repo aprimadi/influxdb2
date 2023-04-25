@@ -8,10 +8,10 @@ use influxdb2::{Client, FromDataPoint};
 
 #[derive(Debug, FromDataPoint)]
 pub struct StockPrice {
-   ticker: String,
-   value: f64,
-   open: f64,
-   time: DateTime<FixedOffset>,
+    ticker: String,
+    value: f64,
+    open: f64,
+    time: DateTime<FixedOffset>,
 }
 
 impl Default for StockPrice {
@@ -37,7 +37,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 
     println!("HealthCheck: {:#?}", client.health().await?);
-    let points: Vec<DataPoint> = vec![ 
+    let points: Vec<DataPoint> = vec![
         DataPoint::builder("bar")
             .tag("ticker", "AAPL")
             .field("value", 123.46)
@@ -50,16 +50,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .build()?,
     ];
     client.write(&bucket, stream::iter(points)).await?;
-    let qs = format!("from(bucket: \"{}\") 
+    let qs = format!("from(bucket: \"{}\")
       |> range(start: -1w)
    ", bucket);
     let query = Query::new(qs.to_string());
 
     println!(
-        "Query result was: {:#?}", 
+        "Query result was: {:#?}",
         client.query::<StockPrice>(Some(query)).await?
     );
 
     Ok(())
 }
-

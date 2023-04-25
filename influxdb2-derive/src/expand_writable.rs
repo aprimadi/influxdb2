@@ -95,7 +95,7 @@ pub fn impl_writeable(tokens: TokenStream) -> TokenStream {
             _ => None,
         })
         .collect();
-    
+
     if tag_writes.len() < 1 {
         panic!("You have to specify at least one #[tag] field.")
     }
@@ -113,7 +113,7 @@ pub fn impl_writeable(tokens: TokenStream) -> TokenStream {
         }
         combined_tag_writes.push(tag_write.clone());
     }
-    
+
     let mut combined_fields_writes = vec![];
     for (index, fields_write) in fields_writes.iter().enumerate() {
         if index > 0 {
@@ -121,7 +121,7 @@ pub fn impl_writeable(tokens: TokenStream) -> TokenStream {
         }
         combined_fields_writes.push(fields_write.clone());
     }
-    
+
     let output = quote! {
         impl #generics #krate::models::WriteDataPoint for #ident #generics
         {
