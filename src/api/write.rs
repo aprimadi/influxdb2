@@ -191,14 +191,13 @@ cpu,host=server01 usage=0.5 1671095854
 
         let client = Client::new(&mockito::server_url(), org, token);
 
-        let points = vec![
-            DataPoint::builder("cpu")
-                .tag("host", "server01")
-                .field("usage", 0.5)
-                .timestamp(1671095854)
-                .build()
-                .unwrap(),
-        ];
+        let point = DataPoint::builder("cpu")
+            .tag("host", "server01")
+            .field("usage", 0.5)
+            .timestamp(1671095854)
+            .build()
+            .unwrap();
+        let points = vec![point];
 
         // If the requests made are incorrect, Mockito returns status 501 and `write`
         // will return an error, which causes the test to fail here instead of

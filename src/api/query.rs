@@ -613,9 +613,7 @@ impl QueryResult {
 
 fn parse_value(s: &str, t: DataType, name: &str) -> Result<Value, RequestError> {
     match t {
-        DataType::String => {
-            Ok(Value::String(String::from(s)))
-        }
+        DataType::String => Ok(Value::String(String::from(s))),
         DataType::Double => {
             let v = s.parse::<f64>().unwrap();
             Ok(Value::Double(OrderedFloat::from(v)))
@@ -661,7 +659,8 @@ mod tests {
     use mockito::{mock, Matcher};
 
     #[derive(FromDataPoint)]
-    struct Empty { }
+    struct Empty {}
+
     impl Default for Empty {
         fn default() -> Self {
             Self {}
@@ -850,6 +849,7 @@ mod tests {
 ,,0,2020-02-17T22:19:49.747562847Z,2020-02-18T22:19:49.747562847Z,2020-02-18T22:08:44.850214724Z,6.6,f,test,1,adsfasdf
 ";
         let qtr = QueryTableResult::new(text);
+        #[rustfmt::skip]
         let expected: [FluxRecord; 2] = [
             FluxRecord {
                 table: 0,
