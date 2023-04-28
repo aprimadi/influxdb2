@@ -33,7 +33,8 @@ impl Client {
     ) -> Result<(), RequestError> {
         let delete_url = self.url("/api/v2/delete");
 
-        let body = serde_json::json!({
+        let body = serde_json
+            ::json!({
                 "start": start.format("%Y-%m-%dT%H:%M:%SZ").to_string(),
                 "stop": stop.format("%Y-%m-%dT%H:%M:%SZ").to_string(),
                 "predicate": predicate,

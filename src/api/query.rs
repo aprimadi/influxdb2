@@ -416,7 +416,7 @@ impl<'a> FallibleIterator for QueryTableResult<'a> {
         loop {
             if !self.csv_reader.read_record(&mut row).unwrap() {
                 // EOF
-                return Ok(None)
+                return Ok(None);
             }
             if row.len() <= 1 {
                 continue;
@@ -445,17 +445,17 @@ impl<'a> FallibleIterator for QueryTableResult<'a> {
             }
             if self.table.is_none() {
                 return Err(RequestError::Deserializing {
-                    text: String::from("annotations not found")
-                })
+                    text: String::from("annotations not found"),
+                });
             }
-            if row.len()-1 != self.table.as_ref().unwrap().columns.len() {
+            if row.len() - 1 != self.table.as_ref().unwrap().columns.len() {
                 return Err(RequestError::Deserializing {
                     text: format!(
                         "row has different number of columns than the table: {} vs {}",
                         row.len() - 1,
                         self.table.as_ref().unwrap().columns.len(),
-                    )
-                })
+                    ),
+                });
             }
             if let Some(s) = row.get(0) {
                 match s {
@@ -465,14 +465,15 @@ impl<'a> FallibleIterator for QueryTableResult<'a> {
                                 // Parse column name (csv header)
                                 if !data_type_annotation_found {
                                     return Err(RequestError::Deserializing {
-                                        text: String::from("datatype annotation not found")
-                                    })
+                                        text: String::from("datatype annotation not found"),
+                                    });
                                 }
                                 if row.get(1).unwrap() == "error" {
                                     parsing_state = ParsingState::Error;
                                 } else {
                                     for i in 1..row.len() {
-                                        let column = &mut self.table.as_mut().unwrap().columns[i-1];
+                                        let column =
+                                            &mut self.table.as_mut().unwrap().columns[i - 1];
                                         column.name = String::from(row.get(i).unwrap());
                                     }
                                     parsing_state = ParsingState::Normal;
@@ -491,23 +492,19 @@ impl<'a> FallibleIterator for QueryTableResult<'a> {
                                     reference = format!(",{}", s);
                                 }
                                 return Err(RequestError::Deserializing {
-                                    text: format!("{}{}", msg, reference)
+                                    text: format!("{}{}", msg, reference),
                                 });
                             }
                             _ => {}
                         }
                         let mut values = BTreeMap::new();
                         for i in 1..row.len() {
-                            let column = &self.table.as_mut().unwrap().columns[i-1];
+                            let column = &self.table.as_mut().unwrap().columns[i - 1];
                             let mut v = row.get(i).unwrap();
                             if v == "" {
                                 v = &column.default_value[..];
                             }
-                            let value = parse_value(
-                                v,
-                                column.data_type,
-                                &column.name[..],
-                            )?;
+                            let value = parse_value(v, column.data_type, &column.name.as_str())?;
                             values.entry(column.name.clone()).or_insert(value);
                         }
                         record = FluxRecord {
@@ -519,26 +516,26 @@ impl<'a> FallibleIterator for QueryTableResult<'a> {
                     "#datatype" => {
                         data_type_annotation_found = true;
                         for i in 1..row.len() {
-                            let column = &mut self.table.as_mut().unwrap().columns[i-1];
+                            let column = &mut self.table.as_mut().unwrap().columns[i - 1];
                             let dt = DataType::from_str(row.get(i).unwrap())?;
                             column.data_type = dt;
                         }
                     }
                     "#group" => {
                         for i in 1..row.len() {
-                            let column = &mut self.table.as_mut().unwrap().columns[i-1];
+                            let column = &mut self.table.as_mut().unwrap().columns[i - 1];
                             column.group = row.get(i).unwrap() == "true";
                         }
                     }
                     "#default" => {
                         for i in 1..row.len() {
-                            let column = &mut self.table.as_mut().unwrap().columns[i-1];
+                            let column = &mut self.table.as_mut().unwrap().columns[i - 1];
                             column.default_value = String::from(row.get(i).unwrap());
                         }
                     }
                     _ => {
                         return Err(RequestError::Deserializing {
-                            text: format!("invalid first cell: {}", s)
+                            text: format!("invalid first cell: {}", s),
                         });
                     }
                 }
@@ -633,14 +630,12 @@ fn parse_value(s: &str, t: DataType, name: &str) -> Result<Value, RequestError> 
             let v = s.parse::<u64>().unwrap();
             Ok(Value::UnsignedLong(v))
         }
-        DataType::Duration => {
-            match parse_duration(s) {
-                Ok(d) => Ok(Value::Duration(chrono::Duration::nanoseconds(d))),
-                Err(_) => Err(RequestError::Deserializing {
-                    text: format!("invalid duration: {}, name: {}", s, name)
-                }),
-            }
-        }
+        DataType::Duration => match parse_duration(s) {
+            Ok(d) => Ok(Value::Duration(chrono::Duration::nanoseconds(d))),
+            Err(_) => Err(RequestError::Deserializing {
+                text: format!("invalid duration: {}, name: {}", s, name),
+            }),
+        },
         DataType::Base64Binary => {
             let b = decode(s).unwrap();
             Ok(Value::Base64Binary(b))
