@@ -338,46 +338,46 @@ impl FromStr for DataType {
 
     fn from_str(input: &str) -> Result<DataType, RequestError> {
         match input {
-            "string"                => Ok(DataType::String),
-            "double"                => Ok(DataType::Double),
-            "boolean"               => Ok(DataType::Bool),
-            "long"                  => Ok(DataType::Long),
-            "unsignedLong"          => Ok(DataType::UnsignedLong),
-            "duration"              => Ok(DataType::Duration),
-            "base64Binary"          => Ok(DataType::Base64Binary),
-            "dateTime:RFC3339"      => Ok(DataType::TimeRFC),
-            "dateTime:RFC3339Nano"  => Ok(DataType::TimeRFC),
+            "string" => Ok(DataType::String),
+            "double" => Ok(DataType::Double),
+            "boolean" => Ok(DataType::Bool),
+            "long" => Ok(DataType::Long),
+            "unsignedLong" => Ok(DataType::UnsignedLong),
+            "duration" => Ok(DataType::Duration),
+            "base64Binary" => Ok(DataType::Base64Binary),
+            "dateTime:RFC3339" => Ok(DataType::TimeRFC),
+            "dateTime:RFC3339Nano" => Ok(DataType::TimeRFC),
             _ => Err(RequestError::Deserializing {
-                text: format!("unknown datatype: {}", input)
-            })
+                text: format!("unknown datatype: {}", input),
+            }),
         }
     }
 }
 
 struct FluxColumn {
-	name:           String,
-	data_type:      DataType,
-	group:          bool,
-	default_value:  String,
+    name: String,
+    data_type: DataType,
+    group: bool,
+    default_value: String,
 }
 
 /// Represents a flux record returned from a query.
 #[derive(Clone, Debug, PartialEq)]
 pub struct FluxRecord {
-    table:  i32,
+    table: i32,
     values: GenericMap,
 }
 
 struct FluxTableMetadata {
-    position:   i32,
-    columns:    Vec<FluxColumn>,
+    position: i32,
+    columns: Vec<FluxColumn>,
 }
 
 struct QueryTableResult<'a> {
-    csv_reader:     csv::Reader<&'a [u8]>,
+    csv_reader: csv::Reader<&'a [u8]>,
     table_position: i32,
-    table_changed:  bool,
-    table:          Option<FluxTableMetadata>,
+    table_changed: bool,
+    table: Option<FluxTableMetadata>,
 }
 
 #[derive(PartialEq)]
