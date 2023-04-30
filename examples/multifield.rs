@@ -28,15 +28,15 @@ impl Default for StockPrice {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let host    = env::var("INFLUXDB_HOST").unwrap();
-    let org     = env::var("INFLUXDB_ORG").unwrap();
-    let token   = env::var("INFLUXDB_TOKEN").unwrap();
-    let bucket  = env::var("INFLUXDB_BUCKET").unwrap();
+    let host = env::var("INFLUXDB_HOST").unwrap();
+    let org = env::var("INFLUXDB_ORG").unwrap();
+    let token = env::var("INFLUXDB_TOKEN").unwrap();
+    let bucket = env::var("INFLUXDB_BUCKET").unwrap();
 
     let client = Client::new(host, org, token);
 
-
     println!("HealthCheck: {:#?}", client.health().await?);
+
     let points: Vec<DataPoint> = vec![
         DataPoint::builder("bar")
             .tag("ticker", "AAPL")
@@ -50,10 +50,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .build()?,
     ];
     client.write(&bucket, stream::iter(points)).await?;
-    let qs = format!("
-        from(bucket: \"{}\")
-            |> range(start: -1w)
-   ", bucket);
+    let qs = format!(
+        "
+            from(bucket: \"{}\")
+                |> range(start: -1w)
+        ",
+        bucket,
+    );
     let query = Query::new(qs.to_string());
 
     println!(

@@ -20,4 +20,3 @@ pub trait ToMap: Default {
     #[allow(clippy::wrong_self_convention)]
     fn to_genericmap(structure: Self) -> GenericMap;
 }
-

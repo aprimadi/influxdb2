@@ -12,13 +12,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let bucket = "bucket";
     let client = Client::new(host, org, token);
 
-    let points = vec![
-        DataPoint::builder("cpu")
-            .tag("host", "server01")
-            .field("usage", 0.5)
-            .timestamp(1671095854)
-            .build()?,
-    ];
+    let point = DataPoint::builder("cpu")
+        .tag("host", "server01")
+        .field("usage", 0.5)
+        .timestamp(1671095854)
+        .build()?;
+    let points = vec![point];
 
     client
         .write_with_precision(bucket, stream::iter(points), TimestampPrecision::Seconds)
