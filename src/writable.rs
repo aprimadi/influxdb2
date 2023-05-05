@@ -22,7 +22,7 @@ struct Value<T: ValueWritable> {
 
 impl<T: ValueWritable> From<T> for Value<T> {
     fn from(value: T) -> Self {
-        Value { inner: value }
+        Self { inner: value }
     }
 }
 impl<T: ValueWritable> ValueWritable for Value<T> {
@@ -100,7 +100,7 @@ struct Key<T: KeyWritable> {
 
 impl<T: KeyWritable> From<T> for Key<T> {
     fn from(value: T) -> Self {
-        Key { inner: value }
+        Self { inner: value }
     }
 }
 
