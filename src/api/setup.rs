@@ -121,7 +121,7 @@ mod tests {
     async fn is_onboarding_allowed() {
         let mock_server = mock("GET", "/api/v2/setup").create();
 
-        let client = Client::new(&mockito::server_url(), "org", "");
+        let client = Client::new(mockito::server_url(), "org", "");
 
         let _result = client.is_onboarding_allowed().await;
 
@@ -146,7 +146,7 @@ mod tests {
             )
             .create();
 
-        let client = Client::new(&mockito::server_url(), org, token);
+        let client = Client::new(mockito::server_url(), org, token);
 
         let _result = client
             .onboarding(
@@ -181,7 +181,7 @@ mod tests {
             )
             .create();
 
-        let client = Client::new(&mockito::server_url(), org, token);
+        let client = Client::new(mockito::server_url(), org, token);
 
         let _result = client
             .post_setup_user(
@@ -213,7 +213,7 @@ mod tests {
             )
             .create();
 
-        let client = Client::new(&mockito::server_url(), org, "");
+        let client = Client::new(mockito::server_url(), org, "");
 
         let _result = client
             .onboarding(username, org, bucket, None, None, None)
@@ -240,7 +240,7 @@ mod tests {
             )
             .create();
 
-        let client = Client::new(&mockito::server_url(), org, token);
+        let client = Client::new(mockito::server_url(), org, token);
 
         let _result = client
             .post_setup_user(username, org, bucket, None, None, None)

@@ -519,7 +519,7 @@ impl<'a> FallibleIterator for QueryTableResult<'a> {
                         for i in 1..row.len() {
                             let column = &self.table.as_mut().unwrap().columns[i - 1];
                             let mut v = row.get(i).unwrap();
-                            if v == "" {
+                            if v.is_empty() {
                                 v = &column.default_value[..];
                             }
                             let value = parse_value(v, column.data_type, &column.name.as_str())?;
@@ -671,14 +671,8 @@ mod tests {
     use crate::FromDataPoint;
     use mockito::{mock, Matcher};
 
-    #[derive(FromDataPoint)]
+    #[derive(Default, FromDataPoint)]
     struct Empty {}
-
-    impl Default for Empty {
-        fn default() -> Self {
-            Self {}
-        }
-    }
 
     #[tokio::test]
     async fn query_suggestions() {
@@ -688,7 +682,7 @@ mod tests {
             .match_header("Authorization", format!("Token {}", token).as_str())
             .create();
 
-        let client = Client::new(&mockito::server_url(), "org", token);
+        let client = Client::new(mockito::server_url(), "org", token);
 
         let _result = client.query_suggestions().await;
 
@@ -711,9 +705,9 @@ mod tests {
         .match_header("Authorization", format!("Token {}", token).as_str())
         .create();
 
-        let client = Client::new(&mockito::server_url(), "org", token);
+        let client = Client::new(mockito::server_url(), "org", token);
 
-        let _result = client.query_suggestions_name(&suggestion_name).await;
+        let _result = client.query_suggestions_name(suggestion_name).await;
 
         mock_server.assert();
     }
@@ -735,7 +729,7 @@ mod tests {
             )
             .create();
 
-        let client = Client::new(&mockito::server_url(), org, token);
+        let client = Client::new(mockito::server_url(), org, token);
 
         let _result = client.query::<Empty>(query).await;
 
@@ -760,7 +754,7 @@ mod tests {
             )
             .create();
 
-        let client = Client::new(&mockito::server_url(), org, token);
+        let client = Client::new(mockito::server_url(), org, token);
 
         let _result = client.query::<Empty>(None).await;
 
@@ -781,7 +775,7 @@ mod tests {
             )
             .create();
 
-        let client = Client::new(&mockito::server_url(), "org", token);
+        let client = Client::new(mockito::server_url(), "org", token);
 
         let _result = client.query_analyze(query).await;
 
@@ -802,7 +796,7 @@ mod tests {
             )
             .create();
 
-        let client = Client::new(&mockito::server_url(), "org", token);
+        let client = Client::new(mockito::server_url(), "org", token);
 
         let _result = client.query_analyze(query).await;
 
@@ -824,7 +818,7 @@ mod tests {
             )
             .create();
 
-        let client = Client::new(&mockito::server_url(), "org", token);
+        let client = Client::new(mockito::server_url(), "org", token);
 
         let _result = client.query_ast(language_request).await;
 
@@ -845,7 +839,7 @@ mod tests {
             )
             .create();
 
-        let client = Client::new(&mockito::server_url(), "org", token);
+        let client = Client::new(mockito::server_url(), "org", token);
 
         let _result = client.query_ast(language_request).await;
 
@@ -895,8 +889,7 @@ mod tests {
                 ].iter().cloned().collect(),
             },
         ];
-        let mut i = 0;
-        for item in qtr.iterator() {
+        for (i, item) in qtr.iterator().enumerate() {
             match item {
                 Ok(record) => {
                     assert_eq!(record, expected[i]);
@@ -905,7 +898,6 @@ mod tests {
                     assert_eq!(format!("{}", e), "");
                 }
             }
-            i += 1;
         }
     }
 }

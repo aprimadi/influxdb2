@@ -149,7 +149,7 @@ mod tests {
             .match_header("Authorization", format!("Token {}", token).as_str())
             .create();
 
-        let client = Client::new(&mockito::server_url(), "", token);
+        let client = Client::new(mockito::server_url(), "", token);
 
         let _result = client.labels().await;
 
@@ -165,7 +165,7 @@ mod tests {
             .match_header("Authorization", format!("Token {}", token).as_str())
             .create();
 
-        let client = Client::new(&mockito::server_url(), "", token);
+        let client = Client::new(mockito::server_url(), "", token);
 
         let _result = client.labels_by_org(org_id).await;
 
@@ -181,7 +181,7 @@ mod tests {
             .match_header("Authorization", format!("Token {}", token).as_str())
             .create();
 
-        let client = Client::new(&mockito::server_url(), "", token);
+        let client = Client::new(mockito::server_url(), "", token);
 
         let _result = client.find_label(label_id).await;
 
@@ -207,7 +207,7 @@ mod tests {
             )
             .create();
 
-        let client = Client::new(&mockito::server_url(), org_id, token);
+        let client = Client::new(mockito::server_url(), org_id, token);
 
         let _result = client.create_label(org_id, name, Some(properties)).await;
 
@@ -225,7 +225,7 @@ mod tests {
             .match_body(format!(r#"{{"orgID":"{}","name":"{}"}}"#, org_id, name).as_str())
             .create();
 
-        let client = Client::new(&mockito::server_url(), org_id, token);
+        let client = Client::new(mockito::server_url(), org_id, token);
 
         let _result = client.create_label(org_id, name, None).await;
 
@@ -251,7 +251,7 @@ mod tests {
             )
             .create();
 
-        let client = Client::new(&mockito::server_url(), "", token);
+        let client = Client::new(mockito::server_url(), "", token);
 
         let _result = client
             .update_label(Some(name.to_string()), Some(properties), label_id)
@@ -270,7 +270,7 @@ mod tests {
             .match_body("{}")
             .create();
 
-        let client = Client::new(&mockito::server_url(), "", token);
+        let client = Client::new(mockito::server_url(), "", token);
 
         let _result = client.update_label(None, None, label_id).await;
 
@@ -286,7 +286,7 @@ mod tests {
             .match_header("Authorization", format!("Token {}", token).as_str())
             .create();
 
-        let client = Client::new(&mockito::server_url(), "", token);
+        let client = Client::new(mockito::server_url(), "", token);
 
         let _result = client.delete_label(label_id).await;
 

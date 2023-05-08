@@ -86,10 +86,9 @@ impl Client {
 
         let body = Body::wrap_stream(body);
 
-        let res = self
+        self
             .write_line_protocol_with_precision(&self.org, bucket, body, timestamp_precision)
-            .await?;
-        Ok(res)
+            .await
     }
 }
 
@@ -109,10 +108,10 @@ pub enum TimestampPrecision {
 impl TimestampPrecision {
     fn api_short_name(&self) -> &str {
         match self {
-            TimestampPrecision::Seconds => "s",
-            TimestampPrecision::Milliseconds => "ms",
-            TimestampPrecision::Microseconds => "us",
-            TimestampPrecision::Nanoseconds => "ns",
+            Self::Seconds => "s",
+            Self::Milliseconds => "ms",
+            Self::Microseconds => "us",
+            Self::Nanoseconds => "ns",
         }
     }
 }
@@ -144,7 +143,7 @@ cpu,host=server01,region=us-west usage=0.87
         .with_status(204)
         .create();
 
-        let client = Client::new(&mockito::server_url(), org, token);
+        let client = Client::new(mockito::server_url(), org, token);
 
         let points = vec![
             DataPoint::builder("cpu")
@@ -189,7 +188,7 @@ cpu,host=server01 usage=0.5 1671095854
         .with_status(204)
         .create();
 
-        let client = Client::new(&mockito::server_url(), org, token);
+        let client = Client::new(mockito::server_url(), org, token);
 
         let point = DataPoint::builder("cpu")
             .tag("host", "server01")
@@ -228,7 +227,7 @@ cpu,host=server01 usage=0.5 1671095854
 
         let write_with_status = |status| async move {
             let mock_server = make_mock_server(status);
-            let client = Client::new(&mockito::server_url(), org, token);
+            let client = Client::new(mockito::server_url(), org, token);
             let points: Vec<DataPoint> = vec![];
             let res = client.write(bucket, stream::iter(points)).await;
             mock_server.assert();

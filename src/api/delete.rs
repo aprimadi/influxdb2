@@ -81,7 +81,7 @@ mod tests {
             )
             .create();
 
-        let client = Client::new(&mockito::server_url(), org, token);
+        let client = Client::new(mockito::server_url(), org, token);
 
         let start = NaiveDate::from_ymd(2020, 1, 1).and_hms(0, 0, 0);
         let stop = NaiveDate::from_ymd(2021, 1, 1).and_hms(0, 0, 0);
