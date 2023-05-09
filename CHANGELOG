@@ -101,3 +101,8 @@
 =====
 
 - Added raw query support
+
+0.4.1
+=====
+
+- Remove use of tracing max_level features [Issue 34](https://github.com/aprimadi/influxdb2/issues/34)
