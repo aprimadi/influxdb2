@@ -86,8 +86,7 @@ impl Client {
 
         let body = Body::wrap_stream(body);
 
-        self
-            .write_line_protocol_with_precision(&self.org, bucket, body, timestamp_precision)
+        self.write_line_protocol_with_precision(&self.org, bucket, body, timestamp_precision)
             .await
     }
 }
