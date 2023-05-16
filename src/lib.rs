@@ -101,6 +101,7 @@
 //! ```
 
 use reqwest::{Method, Url};
+use secrecy::{ExposeSecret, Secret};
 use snafu::Snafu;
 
 /// Errors that occur while making requests to the Influx server.
@@ -147,7 +148,7 @@ pub struct Client {
     pub base: Url,
     /// The organization tied to this client
     pub org: String,
-    auth_header: Option<String>,
+    auth_header: Option<Secret<String>>,
     reqwest: reqwest::Client,
 }
 
@@ -170,7 +171,7 @@ impl Client {
         let auth_header = if token.is_empty() {
             None
         } else {
-            Some(format!("Token {}", token))
+            Some(format!("Token {}", token).into())
         };
 
         let url: String = url.into();
@@ -189,7 +190,7 @@ impl Client {
         let mut req = self.reqwest.request(method, url);
 
         if let Some(auth) = &self.auth_header {
-            req = req.header("Authorization", auth);
+            req = req.header("Authorization", auth.expose_secret());
         }
 
         req
