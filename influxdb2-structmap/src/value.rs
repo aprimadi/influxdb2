@@ -95,4 +95,12 @@ impl Value {
             None
         }
     }
+
+    pub fn timestamp(&self) -> Option<DateTime<FixedOffset>> {
+        if let Value::TimeRFC(timestamp) = self {
+            Some(*timestamp)
+        } else {
+            None
+        }
+    }
 }
