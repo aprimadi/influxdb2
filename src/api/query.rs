@@ -382,8 +382,10 @@ struct FluxColumn {
 /// Represents a flux record returned from a query.
 #[derive(Clone, Debug, PartialEq)]
 pub struct FluxRecord {
-    table: i32,
-    values: GenericMap,
+    /// Table id
+    pub table: i32,
+    /// Map of key/value pairs
+    pub values: GenericMap,
 }
 
 struct FluxTableMetadata {
