@@ -106,3 +106,8 @@
 =====
 
 - Remove use of tracing max_level features [Issue 34](https://github.com/aprimadi/influxdb2/issues/34)
+
+0.4.2
+=====
+
+- Make raw query useful
