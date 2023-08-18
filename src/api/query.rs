@@ -22,6 +22,33 @@ use crate::models::{
     AnalyzeQueryResponse, AstResponse, FluxSuggestion, FluxSuggestions, LanguageRequest, Query,
 };
 
+/// Allows for multiple iterators over the result
+#[derive(Clone, Debug)]
+pub struct QueryTableIter {
+    text: String,
+}
+
+impl<'a> QueryTableIter {
+    fn new(text: String) -> QueryTableIter {
+        return QueryTableIter { text: text };
+    }
+
+    /// Get the iterator
+    pub fn result(
+        self: &'a QueryTableIter,
+    ) -> impl FallibleIterator<Item = FluxRecord, Error = RequestError> + 'a {
+        QueryTableResult::new(&self.text)
+    }
+
+    /// Is the response empty?
+    pub fn is_empty(self: &QueryTableIter) -> bool {
+        match QueryTableResult::new(&self.text).next() {
+            Ok(None) => true,
+            _ => false,
+        }
+    }
+}
+
 impl Client {
     /// Get Query Suggestions
     pub async fn query_suggestions(&self) -> Result<FluxSuggestions, RequestError> {
@@ -126,6 +153,38 @@ impl Client {
                     records.push(record?);
                 }
                 Ok(records)
+            }
+            status => {
+                let text = response.text().await.context(ReqwestProcessing)?;
+                Http { status, text }.fail()?
+            }
+        }
+    }
+
+    /// Query return an iterator over the raw results
+    /// Saves on memory usage
+    pub async fn query_raw_iter(
+        &self,
+        query: Option<Query>,
+    ) -> Result<QueryTableIter, RequestError> {
+        let req_url = self.url("/api/v2/query");
+        let body = serde_json::to_string(&query.unwrap_or_default()).context(Serializing)?;
+
+        let response = self
+            .request(Method::POST, &req_url)
+            .header("Accepting-Encoding", "identity")
+            .header("Content-Type", "application/json")
+            .query(&[("org", &self.org)])
+            .body(body)
+            .send()
+            .await
+            .context(ReqwestProcessing)?;
+
+        match response.status() {
+            StatusCode::OK => {
+                let text = response.text().await.context(ReqwestProcessing)?;
+
+                Ok(QueryTableIter::new(text))
             }
             status => {
                 let text = response.text().await.context(ReqwestProcessing)?;
@@ -411,6 +470,7 @@ impl<'a> QueryTableResult<'a> {
     fn new(text: &'a str) -> Self {
         let reader = csv::ReaderBuilder::new()
             .has_headers(false)
+            .flexible(true)
             .from_reader(text.as_bytes());
         Self {
             csv_reader: reader,
