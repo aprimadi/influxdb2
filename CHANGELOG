@@ -111,3 +111,8 @@
 =====
 
 - Make raw query useful
+
+0.4.3
+=====
+
+- Adding iterative version of raw query
