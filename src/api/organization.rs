@@ -13,16 +13,11 @@ impl Client {
         &self,
         request: ListOrganizationRequest,
     ) -> Result<Organizations, RequestError> {
-        let qs = serde_qs::to_string(&request).unwrap();
-        let mut endpoint = "/api/v2/orgs".to_owned();
-        if !qs.is_empty() {
-            endpoint.push_str("?");
-            endpoint.push_str(&qs);
-        }
-        let url = self.url(&endpoint);
+        let url = self.url("/api/v2/orgs");
 
         let response = self
             .request(Method::GET, &url)
+            .query(&request)
             .send()
             .await
             .context(ReqwestProcessing)?;
@@ -72,16 +67,27 @@ impl ListOrganizationRequest {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use mockito::mock;
 
-    #[test]
-    fn serialize_list_organization_request() {
-        let req = ListOrganizationRequest::new();
-        let qs = serde_qs::to_string(&req).unwrap();
-        assert_eq!(qs, "");
+    #[tokio::test]
+    async fn list_buckets() {
+        let org_id = "0000111100001111".to_string();
+        let token = "some-token";
 
-        let mut req = ListOrganizationRequest::new();
-        req.org = Some("Sahamee".to_owned());
-        let qs = serde_qs::to_string(&req).unwrap();
-        assert_eq!(qs, "org=Sahamee");
+        let mock_server = mock("GET", "/api/v2/orgs?limit=1&orgID=some-org")
+            .match_header("Authorization", format!("Token {}", token).as_str())
+            .create();
+
+        let client = Client::new(mockito::server_url(), &org_id, token);
+
+        let request = ListOrganizationRequest {
+            limit: Some(1),
+            org_id: Some("some-org".to_string()),
+            ..ListOrganizationRequest::default()
+        };
+
+        let _result = client.list_organizations(request).await;
+
+        mock_server.assert();
     }
 }
