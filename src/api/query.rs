@@ -30,7 +30,7 @@ pub struct QueryTableIter {
 
 impl<'a> QueryTableIter {
     fn new(text: String) -> QueryTableIter {
-        return QueryTableIter { text: text };
+        return QueryTableIter { text };
     }
 
     /// Get the iterator
