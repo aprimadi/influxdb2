@@ -13,16 +13,11 @@ impl Client {
         &self,
         request: Option<ListBucketsRequest>,
     ) -> Result<Buckets, RequestError> {
-        let qs = serde_qs::to_string(&request).unwrap();
-        let mut endpoint = "/api/v2/buckets".to_owned();
-        if !qs.is_empty() {
-            endpoint.push_str("?");
-            endpoint.push_str(&qs);
-        }
-        let url = self.url(&endpoint);
+        let url = self.url("/api/v2/buckets");
 
         let response = self
             .request(Method::GET, &url)
+            .query(&request)
             .send()
             .await
             .context(ReqwestProcessing)?;
@@ -114,11 +109,19 @@ mod tests {
     use super::*;
     use mockito::mock;
 
+    fn setup() -> (Client, String, String) {
+        let org_id = "0000111100001111".to_string();
+        let token = "some-token".to_string();
+        let client = Client::new(mockito::server_url(), &org_id, token.clone());
+
+        (client, org_id, token)
+    }
+
     #[tokio::test]
     async fn create_bucket() {
-        let org_id = "0000111100001111".to_string();
+        let (client, org_id, token) = setup();
+
         let bucket = "some-bucket".to_string();
-        let token = "some-token";
 
         let mock_server = mock("POST", "/api/v2/buckets")
             .match_header("Authorization", format!("Token {}", token).as_str())
@@ -131,8 +134,6 @@ mod tests {
             )
             .create();
 
-        let client = Client::new(mockito::server_url(), &org_id, token);
-
         let _result = client
             .create_bucket(Some(PostBucketRequest::new(org_id, bucket)))
             .await;
@@ -140,9 +141,41 @@ mod tests {
         mock_server.assert();
     }
 
-    #[test]
-    fn serialize_empty_list_buckets_request() {
-        let request: Option<ListBucketsRequest> = None;
-        assert_eq!(serde_qs::to_string(&request).unwrap(), "");
+    #[tokio::test]
+    async fn list_buckets_with_params() {
+        let (client, _, token) = setup();
+
+        let limit = 1;
+        let bucket = "some-bucket".to_string();
+
+        let mock_server = mock(
+            "GET",
+            format!("/api/v2/buckets?limit={limit}&name={bucket}").as_str(),
+        )
+        .match_header("Authorization", format!("Token {}", token).as_str())
+        .create();
+
+        let request = ListBucketsRequest {
+            limit: Some(limit),
+            name: Some(bucket),
+            ..ListBucketsRequest::default()
+        };
+
+        let _result = client.list_buckets(Some(request)).await;
+
+        mock_server.assert();
+    }
+
+    #[tokio::test]
+    async fn list_buckets_without_params() {
+        let (client, _, token) = setup();
+
+        let mock_server = mock("GET", "/api/v2/buckets")
+            .match_header("Authorization", format!("Token {}", token).as_str())
+            .create();
+
+        let _result = client.list_buckets(None).await;
+
+        mock_server.assert();
     }
 }
