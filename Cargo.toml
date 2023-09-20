@@ -13,6 +13,7 @@ edition = "2018"
 default = ["native-tls"]
 native-tls = ["reqwest/native-tls"]
 rustls = ["reqwest/rustls-tls"]
+gzip = ["reqwest/gzip", "dep:async-compression", "dep:tokio-util"]
 
 [dependencies] # In alphabetical order
 influxdb2-structmap = { version = "0.2.0", path = "./influxdb2-structmap" }
@@ -32,9 +33,10 @@ reqwest = { version = "0.11", features = ["stream", "json"], default-features = 
 secrecy = "0.8"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.44"
-serde_qs = "0.10"
 snafu = "0.6.6"
 url = "2.1.1"
+async-compression = { version = "0.4.3", features = ["tokio", "gzip"], optional = true }
+tokio-util = { version = "0.7.8", features = ["io"], optional = true }
 
 [dev-dependencies] # In alphabetical order
 mockito = "0.26.0"

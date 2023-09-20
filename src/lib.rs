@@ -102,7 +102,7 @@
 
 use reqwest::{Method, Url};
 use secrecy::{ExposeSecret, Secret};
-use snafu::Snafu;
+use snafu::{ResultExt, Snafu};
 
 /// Errors that occur while making requests to the Influx server.
 #[derive(Debug, Snafu)]
@@ -141,6 +141,13 @@ pub enum RequestError {
     },
 }
 
+#[cfg(feature = "gzip")]
+#[derive(Debug, Clone)]
+enum Compression {
+    None,
+    Gzip,
+}
+
 /// Client to a server supporting the InfluxData 2.0 API.
 #[derive(Debug, Clone)]
 pub struct Client {
@@ -150,6 +157,8 @@ pub struct Client {
     pub org: String,
     auth_header: Option<Secret<String>>,
     reqwest: reqwest::Client,
+    #[cfg(feature = "gzip")]
+    compression: Compression,
 }
 
 impl Client {
@@ -162,6 +171,60 @@ impl Client {
     /// ```
     /// let client = influxdb2::Client::new("http://localhost:8888", "org", "my-token");
     /// ```
+    pub fn new(
+        url: impl Into<String>,
+        org: impl Into<String>,
+        auth_token: impl Into<String>,
+    ) -> Self {
+        // unwrap is used to maintain backwards compatibility
+        // panicking was present earlier as well inside of reqwest
+        ClientBuilder::new(url, org, auth_token).build().unwrap()
+    }
+
+    /// Consolidate common request building code
+    fn request(&self, method: Method, url: &str) -> reqwest::RequestBuilder {
+        let mut req = self.reqwest.request(method, url);
+
+        if let Some(auth) = &self.auth_header {
+            req = req.header("Authorization", auth.expose_secret());
+        }
+
+        req
+    }
+
+    /// Join base Url of the client to target API endpoint into valid Url
+    fn url(&self, endpoint: &str) -> String {
+        let mut url = self.base.clone();
+        url.set_path(endpoint);
+        url.into()
+    }
+}
+
+/// Errors that occur when building the client
+#[derive(Debug, Snafu)]
+pub enum BuildError {
+    /// While constructing the reqwest client an error occured
+    #[snafu(display("Error while building the client: {}", source))]
+    ReqwestClientError {
+        /// Reqwest internal error
+        source: reqwest::Error,
+    },
+}
+/// ClientBuilder builds the `Client`
+#[derive(Debug)]
+pub struct ClientBuilder {
+    /// The base URL this client sends requests to
+    pub base: Url,
+    /// The organization tied to this client
+    pub org: String,
+    auth_header: Option<Secret<String>>,
+    reqwest: reqwest::ClientBuilder,
+    #[cfg(feature = "gzip")]
+    compression: Compression,
+}
+
+impl ClientBuilder {
+    /// Construct a new `ClientBuilder`.
     pub fn new(
         url: impl Into<String>,
         org: impl Into<String>,
@@ -181,26 +244,30 @@ impl Client {
             base,
             org: org.into(),
             auth_header,
-            reqwest: reqwest::Client::new(),
+            reqwest: reqwest::ClientBuilder::new(),
+            #[cfg(feature = "gzip")]
+            compression: Compression::None,
         }
     }
 
-    /// Consolidate common request building code
-    fn request(&self, method: Method, url: &str) -> reqwest::RequestBuilder {
-        let mut req = self.reqwest.request(method, url);
-
-        if let Some(auth) = &self.auth_header {
-            req = req.header("Authorization", auth.expose_secret());
-        }
-
-        req
+    /// Enable gzip compression on the write and write_with_precision calls
+    #[cfg(feature = "gzip")]
+    pub fn gzip(mut self, enable: bool) -> ClientBuilder {
+        self.reqwest = self.reqwest.gzip(enable);
+        self.compression = Compression::Gzip;
+        self
     }
 
-    /// Join base Url of the client to target API endpoint into valid Url
-    fn url(&self, endpoint: &str) -> String {
-        let mut url = self.base.clone();
-        url.set_path(endpoint);
-        url.into()
+    /// Build returns the influx client
+    pub fn build(self) -> Result<Client, BuildError> {
+        Ok(Client {
+            base: self.base,
+            org: self.org,
+            auth_header: self.auth_header,
+            reqwest: self.reqwest.build().context(ReqwestClientError)?,
+            #[cfg(feature = "gzip")]
+            compression: self.compression,
+        })
     }
 }
 
