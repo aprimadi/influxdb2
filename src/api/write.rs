@@ -2,8 +2,10 @@
 
 use crate::models::WriteDataPoint;
 use crate::{Client, Http, RequestError, ReqwestProcessing};
+
 use bytes::BufMut;
 use futures::{Stream, StreamExt};
+use reqwest::header::HeaderMap;
 use reqwest::{Body, Method, StatusCode};
 use snafu::ResultExt;
 use std::io::{self, Write};
@@ -30,11 +32,30 @@ impl Client {
         body: impl Into<Body> + Send,
         precision: TimestampPrecision,
     ) -> Result<(), RequestError> {
+        self.write_line_protocol_with_precision_headers(
+            org,
+            bucket,
+            body,
+            precision,
+            HeaderMap::new(),
+        )
+        .await
+    }
+
+    async fn write_line_protocol_with_precision_headers(
+        &self,
+        org: &str,
+        bucket: &str,
+        body: impl Into<Body> + Send,
+        precision: TimestampPrecision,
+        headers: HeaderMap,
+    ) -> Result<(), RequestError> {
         let body = body.into();
         let write_url = self.url("/api/v2/write");
 
         let response = self
             .request(Method::POST, &write_url)
+            .headers(headers)
             .query(&[
                 ("bucket", bucket),
                 ("org", org),
@@ -84,7 +105,38 @@ impl Client {
             Ok::<_, io::Error>(buffer.split().freeze())
         });
 
-        let body = Body::wrap_stream(body);
+        #[cfg(feature = "gzip")]
+        {
+            use crate::Compression;
+            use async_compression::tokio::bufread::GzipEncoder;
+            use async_compression::Level;
+            use reqwest::header::HeaderValue;
+            use tokio_util::io::{ReaderStream, StreamReader};
+
+            match self.compression {
+                Compression::Gzip => {
+                    let encoder = GzipEncoder::with_quality(StreamReader::new(body), Level::Best);
+                    let body: Body = Body::wrap_stream(ReaderStream::new(encoder));
+
+                    let mut headers = HeaderMap::new();
+                    headers.insert("Content-Encoding", HeaderValue::from_static("gzip"));
+
+                    return self
+                        .write_line_protocol_with_precision_headers(
+                            &self.org,
+                            bucket,
+                            body,
+                            timestamp_precision,
+                            headers,
+                        )
+                        .await;
+                }
+                Compression::None => {
+                    // fall through
+                }
+            }
+        }
+        let body: Body = Body::wrap_stream(body);
 
         self.write_line_protocol_with_precision(&self.org, bucket, body, timestamp_precision)
             .await

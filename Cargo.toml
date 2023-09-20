@@ -13,6 +13,7 @@ edition = "2018"
 default = ["native-tls"]
 native-tls = ["reqwest/native-tls"]
 rustls = ["reqwest/rustls-tls"]
+gzip = ["reqwest/gzip", "dep:async-compression", "dep:tokio-util"]
 
 [dependencies] # In alphabetical order
 influxdb2-structmap = { version = "0.2.0", path = "./influxdb2-structmap" }
@@ -41,6 +42,8 @@ tempfile = "3.1.0"
 tracing = "0.1"
 tracing-subscriber = { version = "0.2", default-features = false, features = ["env-filter", "smallvec", "chrono", "parking_lot", "registry", "fmt", "ansi", "json"] }
 url = "2.1.1"
+async-compression = { version = "0.4.3", features = ["tokio", "gzip"], optional = true }
+tokio-util = { version = "0.7.8", features = ["io"], optional = true }
 
 [dev-dependencies] # In alphabetical order
 mockito = "0.26.0"
