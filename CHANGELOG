@@ -116,3 +116,8 @@
 =====
 
 - Adding iterative version of raw query
+
+0.4.4
+=====
+
+- GZip compression support
