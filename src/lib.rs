@@ -230,6 +230,18 @@ impl ClientBuilder {
         org: impl Into<String>,
         auth_token: impl Into<String>,
     ) -> Self {
+        Self::with_builder(reqwest::ClientBuilder::new(), url, org, auth_token)
+    }
+
+    /// Construct a new `ClientBuilder` with a provided [`reqwest::ClientBuilder`].
+    ///
+    /// Can be used to pass custom `reqwest` parameters, such as TLS configuration.
+    pub fn with_builder(
+        builder: reqwest::ClientBuilder,
+        url: impl Into<String>,
+        org: impl Into<String>,
+        auth_token: impl Into<String>,
+    ) -> Self {
         let token = auth_token.into();
         let auth_header = if token.is_empty() {
             None
@@ -244,7 +256,7 @@ impl ClientBuilder {
             base,
             org: org.into(),
             auth_header,
-            reqwest: reqwest::ClientBuilder::new(),
+            reqwest: builder,
             #[cfg(feature = "gzip")]
             compression: Compression::None,
         }
