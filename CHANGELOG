@@ -121,3 +121,8 @@
 =====
 
 - GZip compression support
+
+0.4.5
+=====
+
+- Ability to pass custom reqwest builder to client builder
