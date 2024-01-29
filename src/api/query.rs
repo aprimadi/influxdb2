@@ -256,7 +256,6 @@ impl Client {
         bucket: &str,
         days_ago: Option<i64>
     ) -> Result<Vec<String>, RequestError> {
-        let req_url = self.url("/api/v2/query");
         let query = Query::new(format!(
             r#"import "influxdata/influxdb/schema"
 
@@ -266,8 +265,7 @@ schema.measurements(bucket: "{bucket}"{}) "#,
                 None => { String::from("") }
             }
         ));
-
-        self.exec_schema_query(&req_url, query).await
+        self.exec_schema_query(query).await
     }
 
     /// List a measurement's field keys
@@ -277,7 +275,6 @@ schema.measurements(bucket: "{bucket}"{}) "#,
         measurement: &str,
         days_ago: Option<i64>
     ) -> Result<Vec<String>, RequestError> {
-        let req_url = self.url("/api/v2/query");
         let query = Query::new(format!(
             r#"import "influxdata/influxdb/schema"
 
@@ -290,8 +287,7 @@ schema.measurements(bucket: "{bucket}"{}) "#,
                 None => { String::from("") }
             }
         ));
-
-        self.exec_schema_query(&req_url, query).await
+        self.exec_schema_query(query).await
     }
 
     /// List keys of measurement tag
@@ -302,7 +298,6 @@ schema.measurements(bucket: "{bucket}"{}) "#,
         tag: &str,
         days_ago: Option<i64>
     ) -> Result<Vec<String>, RequestError> {
-        let req_url = self.url("/api/v2/query");
         let query = Query::new(format!(
             r#"import "influxdata/influxdb/schema"
 
@@ -316,8 +311,7 @@ schema.measurements(bucket: "{bucket}"{}) "#,
                 None => { String::from("") }
             }
         ));
-
-        self.exec_schema_query(&req_url, query).await
+        self.exec_schema_query(query).await
     }
 
     /// List all tag values for measurement
@@ -327,8 +321,6 @@ schema.measurements(bucket: "{bucket}"{}) "#,
         measurement: &str,
         days_ago: Option<i64>
     ) -> Result<Vec<String>, RequestError> {
-
-        let req_url = self.url("/api/v2/query");
         let query = Query::new(format!(
             r#"import "influxdata/influxdb/schema"
             
@@ -341,15 +333,14 @@ schema.measurements(bucket: "{bucket}"{}) "#,
                 None => { String::from("") }
             }
         ));
-        self.exec_schema_query(&req_url, query).await
+        self.exec_schema_query(query).await
     }
 
     async fn exec_schema_query(
-        &self, 
-        req_url: &str, 
+        &self,
         query: Query
     ) -> Result<Vec<String>, RequestError> {
-
+        let req_url = self.url("/api/v2/query");
         let body = serde_json::to_string(&query).context(Serializing)?;
 
         let response = self
