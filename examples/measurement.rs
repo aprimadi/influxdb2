@@ -9,19 +9,27 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     let client = influxdb2::Client::new(influx_url, org, token);
 
-    let measurements = client.list_measurements(bucket).await.unwrap();
+    let measurements = client.list_measurements(bucket, Some(365)).await.unwrap();
     println!("measurements: {:?}", measurements);
 
     for m in measurements.iter() {
         let field_keys = client
-            .list_measurement_field_keys(bucket, &m)
+            .list_measurement_field_keys(bucket, &m, Some(365))
             .await
             .unwrap();
         println!("field keys: {:?}", field_keys);
     }
 
     for m in measurements.iter() {
-        let tag_values = client.list_measurement_tag_values(bucket, &m, "host").await;
+        let tag_values = client.list_measurement_tag_values(bucket, &m, "host", Some(365)).await;
+        println!(
+            "tag values for measurement {} and tag {}: {:?}",
+            &m, "host", tag_values
+        );
+    }
+
+    for m in measurements.iter() {
+        let tag_values = client.list_measurement_tag_keys(bucket, &m, Some(365)).await;
         println!(
             "tag values for measurement {} and tag {}: {:?}",
             &m, "host", tag_values
