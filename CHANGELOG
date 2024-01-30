@@ -126,3 +126,8 @@
 =====
 
 - Ability to pass custom reqwest builder to client builder
+
+0.4.6
+=====
+
+- Adding optional `start` parameter in schema APIs
