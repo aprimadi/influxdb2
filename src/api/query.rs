@@ -251,106 +251,137 @@ impl Client {
     }
 
     /// Returns bucket measurements
+    ///
+    /// # Arguments
+    ///
+    /// * `bucket` - The bucket name
+    /// * `start` - Optional start time. Default is `-30d`
+    /// * `stop` - Optional stop time. Default is `now()`
     pub async fn list_measurements(
         &self,
         bucket: &str,
-        days_ago: Option<i64>,
+        start: Option<&str>,
+        stop: Option<&str>,
     ) -> Result<Vec<String>, RequestError> {
+        let mut params = vec![];
+        params.push(format!(r#"bucket: "{bucket}""#));
+        if let Some(start) = start {
+            params.push(format!("start: {start}"));
+        }
+        if let Some(stop) = stop {
+            params.push(format!("stop: {stop}"));
+        }
+        let params = params.join(", ");
+
         let query = Query::new(format!(
             r#"import "influxdata/influxdb/schema"
 
-schema.measurements(bucket: "{bucket}"{}) "#,
-            match days_ago {
-                Some(days_ago) => {
-                    format!(", start: -{}d", days_ago)
-                }
-                None => {
-                    String::from("")
-                }
-            }
+            schema.measurements({params})"#
         ));
         self.exec_schema_query(query).await
     }
 
     /// List field keys for measurement
+    ///
+    /// # Arguments
+    ///
+    /// * `bucket` - The bucket name
+    /// * `measurement` - The measurement name
+    /// * `start` - Optional start time. Default is `-30d`
+    /// * `stop` - Optional stop time. Default is `now()`
     pub async fn list_measurement_field_keys(
         &self,
         bucket: &str,
         measurement: &str,
-        days_ago: Option<i64>,
+        start: Option<&str>,
+        stop: Option<&str>,
     ) -> Result<Vec<String>, RequestError> {
+        let mut params = vec![];
+        params.push(format!(r#"bucket: "{bucket}""#));
+        params.push(format!(r#"measurement: "{measurement}""#));
+        if let Some(start) = start {
+            params.push(format!("start: {start}"));
+        }
+        if let Some(stop) = stop {
+            params.push(format!("stop: {stop}"));
+        }
+        let params = params.join(", ");
+
         let query = Query::new(format!(
             r#"import "influxdata/influxdb/schema"
 
-            schema.measurementFieldKeys(
-                bucket: "{bucket}",
-                measurement: "{measurement}",
-                {}
-            )"#,
-            match days_ago {
-                Some(days_ago) => {
-                    format!("start: -{}d", days_ago)
-                }
-                None => {
-                    String::from("")
-                }
-            }
+            schema.measurementFieldKeys({params})"#,
         ));
         self.exec_schema_query(query).await
     }
 
     /// List all tag values for measurement tag
+    ///
+    /// # Arguments
+    ///
+    /// * `bucket` - The bucket name
+    /// * `measurement` - The measurement name
+    /// * `tag` - The tag name
+    /// * `start` - Optional start time. Default is `-30d`
+    /// * `stop` - Optional stop time. Default is `now()`
     pub async fn list_measurement_tag_values(
         &self,
         bucket: &str,
         measurement: &str,
         tag: &str,
-        days_ago: Option<i64>,
+        start: Option<&str>,
+        stop: Option<&str>,
     ) -> Result<Vec<String>, RequestError> {
+        let mut params = vec![];
+        params.push(format!(r#"bucket: "{bucket}""#));
+        params.push(format!(r#"measurement: "{measurement}""#));
+        params.push(format!(r#"tag: "{tag}""#));
+        if let Some(start) = start {
+            params.push(format!("start: {start}"));
+        }
+        if let Some(stop) = stop {
+            params.push(format!("stop: {stop}"));
+        }
+        let params = params.join(", ");
+
         let query = Query::new(format!(
             r#"import "influxdata/influxdb/schema"
 
-            schema.measurementTagValues(
-                bucket: "{bucket}",
-                measurement: "{measurement}",
-                tag: "{tag}",
-                {}
-            )"#,
-            match days_ago {
-                Some(days_ago) => {
-                    format!("start: -{}d", days_ago)
-                }
-                None => {
-                    String::from("")
-                }
-            }
+            schema.measurementTagValues({params})"#,
         ));
         self.exec_schema_query(query).await
     }
 
     /// List all tag keys for measurement
+    ///
+    /// # Arguments
+    ///
+    /// * `bucket` - The bucket name
+    /// * `measurement` - The measurement name
+    /// * `start` - Optional start time. Default is `-30d`
+    /// * `stop` - Optional stop time. Default is `now()`
     pub async fn list_measurement_tag_keys(
         &self,
         bucket: &str,
         measurement: &str,
-        days_ago: Option<i64>,
+        start: Option<&str>,
+        stop: Option<&str>,
     ) -> Result<Vec<String>, RequestError> {
+        let mut params = vec![];
+        params.push(format!(r#"bucket: "{bucket}""#));
+        params.push(format!(r#"measurement: "{measurement}""#));
+        if let Some(start) = start {
+            params.push(format!("start: {start}"));
+        }
+        if let Some(stop) = stop {
+            params.push(format!("stop: {stop}"));
+        }
+        let params = params.join(", ");
+
         let query = Query::new(format!(
             r#"import "influxdata/influxdb/schema"
-            
-            schema.measurementTagKeys(
-                bucket: "{bucket}",
-                measurement: "{measurement}",
-                {}
-            )"#,
-            match days_ago {
-                Some(days_ago) => {
-                    format!("start: -{}d", days_ago)
-                }
-                None => {
-                    String::from("")
-                }
-            }
+
+            schema.measurementTagKeys({params})"#,
         ));
         self.exec_schema_query(query).await
     }
