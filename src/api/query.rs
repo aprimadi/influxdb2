@@ -272,7 +272,7 @@ schema.measurements(bucket: "{bucket}"{}) "#,
         self.exec_schema_query(query).await
     }
 
-    /// List a measurement's field keys
+    /// List field keys for measurement
     pub async fn list_measurement_field_keys(
         &self,
         bucket: &str,
@@ -299,7 +299,7 @@ schema.measurements(bucket: "{bucket}"{}) "#,
         self.exec_schema_query(query).await
     }
 
-    /// List keys of measurement tag
+    /// List all tag values for measurement tag
     pub async fn list_measurement_tag_values(
         &self,
         bucket: &str,
@@ -328,7 +328,7 @@ schema.measurements(bucket: "{bucket}"{}) "#,
         self.exec_schema_query(query).await
     }
 
-    /// List all tag values for measurement
+    /// List all tag keys for measurement
     pub async fn list_measurement_tag_keys(
         &self,
         bucket: &str,
