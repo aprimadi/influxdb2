@@ -251,117 +251,112 @@ impl Client {
     }
 
     /// Returns bucket measurements
-    pub async fn list_measurements(&self, bucket: &str) -> Result<Vec<String>, RequestError> {
-        let req_url = self.url("/api/v2/query");
+    pub async fn list_measurements(
+        &self,
+        bucket: &str,
+        days_ago: Option<i64>,
+    ) -> Result<Vec<String>, RequestError> {
         let query = Query::new(format!(
             r#"import "influxdata/influxdb/schema"
 
-schema.measurements(bucket: "{bucket}") "#
+schema.measurements(bucket: "{bucket}"{}) "#,
+            match days_ago {
+                Some(days_ago) => {
+                    format!(", start: -{}d", days_ago)
+                }
+                None => {
+                    String::from("")
+                }
+            }
         ));
-        let body = serde_json::to_string(&query).context(Serializing)?;
-
-        let response = self
-            .request(Method::POST, &req_url)
-            .header("Accepting-Encoding", "identity")
-            .header("Content-Type", "application/json")
-            .query(&[("org", &self.org)])
-            .body(body)
-            .send()
-            .await
-            .context(ReqwestProcessing)?;
-
-        match response.status() {
-            StatusCode::OK => {
-                let text = response.text().await.unwrap();
-                let mut reader = csv::ReaderBuilder::new()
-                    .has_headers(true)
-                    .comment(Some(b'#'))
-                    .from_reader(text.as_bytes());
-
-                Ok(reader
-                    .records()
-                    .into_iter()
-                    .flatten()
-                    .map(|r| r.get(3).map(|s| s.to_owned()))
-                    .flatten()
-                    .collect())
-            }
-            status => {
-                let text = response.text().await.context(ReqwestProcessing)?;
-                Http { status, text }.fail()?
-            }
-        }
+        self.exec_schema_query(query).await
     }
 
-    /// List a measurement's field keys
+    /// List field keys for measurement
     pub async fn list_measurement_field_keys(
         &self,
         bucket: &str,
         measurement: &str,
+        days_ago: Option<i64>,
     ) -> Result<Vec<String>, RequestError> {
-        let req_url = self.url("/api/v2/query");
         let query = Query::new(format!(
             r#"import "influxdata/influxdb/schema"
 
             schema.measurementFieldKeys(
                 bucket: "{bucket}",
                 measurement: "{measurement}",
-            )"#
+                {}
+            )"#,
+            match days_ago {
+                Some(days_ago) => {
+                    format!("start: -{}d", days_ago)
+                }
+                None => {
+                    String::from("")
+                }
+            }
         ));
-
-        let body = serde_json::to_string(&query).context(Serializing)?;
-
-        let response = self
-            .request(Method::POST, &req_url)
-            .header("Accepting-Encoding", "identity")
-            .header("Content-Type", "application/json")
-            .query(&[("org", &self.org)])
-            .body(body)
-            .send()
-            .await
-            .context(ReqwestProcessing)?;
-
-        match response.status() {
-            StatusCode::OK => {
-                let text = response.text().await.unwrap();
-                let mut reader = csv::ReaderBuilder::new()
-                    .has_headers(true)
-                    .comment(Some(b'#'))
-                    .from_reader(text.as_bytes());
-
-                Ok(reader
-                    .records()
-                    .into_iter()
-                    .flatten()
-                    .map(|r| r.get(3).map(|s| s.to_owned()))
-                    .flatten()
-                    .collect())
-            }
-            status => {
-                let text = response.text().await.context(ReqwestProcessing)?;
-                Http { status, text }.fail()?
-            }
-        }
+        self.exec_schema_query(query).await
     }
 
-    /// List keys of measurement tag
+    /// List all tag values for measurement tag
     pub async fn list_measurement_tag_values(
         &self,
         bucket: &str,
         measurement: &str,
         tag: &str,
+        days_ago: Option<i64>,
     ) -> Result<Vec<String>, RequestError> {
-        let req_url = self.url("/api/v2/query");
         let query = Query::new(format!(
             r#"import "influxdata/influxdb/schema"
 
             schema.measurementTagValues(
                 bucket: "{bucket}",
                 measurement: "{measurement}",
-                tag: "{tag}"
-            )"#
+                tag: "{tag}",
+                {}
+            )"#,
+            match days_ago {
+                Some(days_ago) => {
+                    format!("start: -{}d", days_ago)
+                }
+                None => {
+                    String::from("")
+                }
+            }
         ));
+        self.exec_schema_query(query).await
+    }
 
+    /// List all tag keys for measurement
+    pub async fn list_measurement_tag_keys(
+        &self,
+        bucket: &str,
+        measurement: &str,
+        days_ago: Option<i64>,
+    ) -> Result<Vec<String>, RequestError> {
+        let query = Query::new(format!(
+            r#"import "influxdata/influxdb/schema"
+            
+            schema.measurementTagKeys(
+                bucket: "{bucket}",
+                measurement: "{measurement}",
+                {}
+            )"#,
+            match days_ago {
+                Some(days_ago) => {
+                    format!("start: -{}d", days_ago)
+                }
+                None => {
+                    String::from("")
+                }
+            }
+        ));
+        self.exec_schema_query(query).await
+    }
+
+    async fn exec_schema_query(&self, query: Query) -> Result<Vec<String>, RequestError> {
+        let req_url = self.url("/api/v2/query");
         let body = serde_json::to_string(&query).context(Serializing)?;
 
         let response = self
