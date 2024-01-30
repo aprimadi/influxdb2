@@ -252,17 +252,21 @@ impl Client {
 
     /// Returns bucket measurements
     pub async fn list_measurements(
-        &self, 
+        &self,
         bucket: &str,
-        days_ago: Option<i64>
+        days_ago: Option<i64>,
     ) -> Result<Vec<String>, RequestError> {
         let query = Query::new(format!(
             r#"import "influxdata/influxdb/schema"
 
-schema.measurements(bucket: "{bucket}"{}) "#, 
+schema.measurements(bucket: "{bucket}"{}) "#,
             match days_ago {
-                Some(days_ago) => { format!(", start: -{}d", days_ago) },
-                None => { String::from("") }
+                Some(days_ago) => {
+                    format!(", start: -{}d", days_ago)
+                }
+                None => {
+                    String::from("")
+                }
             }
         ));
         self.exec_schema_query(query).await
@@ -273,7 +277,7 @@ schema.measurements(bucket: "{bucket}"{}) "#,
         &self,
         bucket: &str,
         measurement: &str,
-        days_ago: Option<i64>
+        days_ago: Option<i64>,
     ) -> Result<Vec<String>, RequestError> {
         let query = Query::new(format!(
             r#"import "influxdata/influxdb/schema"
@@ -282,9 +286,14 @@ schema.measurements(bucket: "{bucket}"{}) "#,
                 bucket: "{bucket}",
                 measurement: "{measurement}",
                 {}
-            )"#, match days_ago {
-                Some(days_ago) => { format!("start: -{}d", days_ago) },
-                None => { String::from("") }
+            )"#,
+            match days_ago {
+                Some(days_ago) => {
+                    format!("start: -{}d", days_ago)
+                }
+                None => {
+                    String::from("")
+                }
             }
         ));
         self.exec_schema_query(query).await
@@ -296,7 +305,7 @@ schema.measurements(bucket: "{bucket}"{}) "#,
         bucket: &str,
         measurement: &str,
         tag: &str,
-        days_ago: Option<i64>
+        days_ago: Option<i64>,
     ) -> Result<Vec<String>, RequestError> {
         let query = Query::new(format!(
             r#"import "influxdata/influxdb/schema"
@@ -306,9 +315,14 @@ schema.measurements(bucket: "{bucket}"{}) "#,
                 measurement: "{measurement}",
                 tag: "{tag}",
                 {}
-            )"#, match days_ago {
-                Some(days_ago) => { format!("start: -{}d", days_ago) },
-                None => { String::from("") }
+            )"#,
+            match days_ago {
+                Some(days_ago) => {
+                    format!("start: -{}d", days_ago)
+                }
+                None => {
+                    String::from("")
+                }
             }
         ));
         self.exec_schema_query(query).await
@@ -319,7 +333,7 @@ schema.measurements(bucket: "{bucket}"{}) "#,
         &self,
         bucket: &str,
         measurement: &str,
-        days_ago: Option<i64>
+        days_ago: Option<i64>,
     ) -> Result<Vec<String>, RequestError> {
         let query = Query::new(format!(
             r#"import "influxdata/influxdb/schema"
@@ -328,18 +342,20 @@ schema.measurements(bucket: "{bucket}"{}) "#,
                 bucket: "{bucket}",
                 measurement: "{measurement}",
                 {}
-            )"#, match days_ago {
-                Some(days_ago) => { format!("start: -{}d", days_ago) },
-                None => { String::from("") }
+            )"#,
+            match days_ago {
+                Some(days_ago) => {
+                    format!("start: -{}d", days_ago)
+                }
+                None => {
+                    String::from("")
+                }
             }
         ));
         self.exec_schema_query(query).await
     }
 
-    async fn exec_schema_query(
-        &self,
-        query: Query
-    ) -> Result<Vec<String>, RequestError> {
+    async fn exec_schema_query(&self, query: Query) -> Result<Vec<String>, RequestError> {
         let req_url = self.url("/api/v2/query");
         let body = serde_json::to_string(&query).context(Serializing)?;
 

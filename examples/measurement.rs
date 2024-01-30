@@ -21,7 +21,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     for m in measurements.iter() {
-        let tag_values = client.list_measurement_tag_values(bucket, &m, "host", Some(365)).await;
+        let tag_values = client
+            .list_measurement_tag_values(bucket, &m, "host", Some(365))
+            .await;
         println!(
             "tag values for measurement {} and tag {}: {:?}",
             &m, "host", tag_values
@@ -29,7 +31,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
     }
 
     for m in measurements.iter() {
-        let tag_values = client.list_measurement_tag_keys(bucket, &m, Some(365)).await;
+        let tag_values = client
+            .list_measurement_tag_keys(bucket, &m, Some(365))
+            .await;
         println!(
             "tag values for measurement {} and tag {}: {:?}",
             &m, "host", tag_values
