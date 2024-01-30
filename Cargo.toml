@@ -1,6 +1,6 @@
 [package]
 name = "influxdb2"
-version = "0.4.6"
+version = "0.5.0"
 authors = ["Armin Primadi <aprimadi@gmail.com>", "Paul Dix <paul@pauldix.net>"]
 keywords = ["influxdb", "influxdb2", "influxdb-client"]
 description = "Influxdb 2 client library for rust"

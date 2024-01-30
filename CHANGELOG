@@ -131,3 +131,8 @@
 =====
 
 - Adding optional `start` parameter in schema APIs
+
+0.5.0
+=====
+
+- Add `start` and `stop` optional parameters to schema query API (non-backwards compatible change)
