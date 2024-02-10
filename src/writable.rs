@@ -77,7 +77,7 @@ impl<T: ValueWritable> ValueWritable for Option<T> {
     fn encode_value(&self) -> String {
         match self {
             Some(v) => v.encode_value(),
-            None => "\"None\"".to_string(),
+            None => "None".to_string(),
         }
     }
 }
