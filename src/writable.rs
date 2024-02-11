@@ -198,6 +198,18 @@ mod tests {
     }
 
     #[test]
+    fn value_writable_option_f64_not_none() {
+        let a: Option<f64> = Some(78.4);
+        assert_eq!(a.encode_value(), "78.4");
+    }
+
+    #[test]
+    fn value_writable_option_f64_none() {
+        let a: Option<f64> = None;
+        assert_eq!(a.encode_value(), "None");
+    }
+
+    #[test]
     fn tags_tuple() {
         let a: (&str, &str) = ("33", "str");
         assert_eq!(a.encode_tags(), "33=str");
