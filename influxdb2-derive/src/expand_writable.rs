@@ -57,13 +57,10 @@ pub fn impl_writeable(tokens: TokenStream) -> TokenStream {
                 let kind = f.kind.clone();
                 Some(quote! {
                     if <#kind as #writable_krate::KeyWritable>::encode_key(&self.#ident) != "None"{
-                        if first_tag_write == false {
-                            w.write_all(b",")?;
-                        }
+                        w.write_all(b",")?;
                         w.write_all(format!("{}", #ident_str).as_bytes())?;
                         w.write_all(b"=")?;
                         w.write_all(<#kind as #writable_krate::KeyWritable>::encode_key(&self.#ident).into_bytes().as_slice())?;
-                        first_tag_write = false;
                     }
                 })
             }
@@ -100,6 +97,7 @@ pub fn impl_writeable(tokens: TokenStream) -> TokenStream {
                 let ident = f.ident.clone();
                 let kind = f.kind.clone();
                 Some(quote! {
+                    w.write_all(b" ")?;
                     w.write_all(<#kind as #writable_krate::TimestampWritable>::encode_timestamp(&self.#ident).into_bytes().as_slice())?;
                 })
             }
@@ -107,11 +105,8 @@ pub fn impl_writeable(tokens: TokenStream) -> TokenStream {
         })
         .collect();
 
-    if tag_writes.len() < 1 {
-        panic!("You have to specify at least one #[tag] field.")
-    }
-    if timestamp_writes.len() != 1 {
-        panic!("You have to specify at exact one #[timestamp] field.")
+    if timestamp_writes.len() > 1 {
+        panic!("You have to specify at most one #[timestamp] field.")
     }
     if fields_writes.len() < 1 {
         panic!("You have to specify at least one #[field] field.")
@@ -123,9 +118,8 @@ pub fn impl_writeable(tokens: TokenStream) -> TokenStream {
             fn write_data_point_to<W>(&self,mut w: W) -> std::io::Result<()>
             where
                 W: std::io::Write{
-                w.write_all(format!("{},", #measure).as_bytes())?;
+                w.write_all(format!("{}", #measure).as_bytes())?;
 
-                let mut first_tag_write = true;
                 #(
                     #tag_writes
                 )*
@@ -134,7 +128,7 @@ pub fn impl_writeable(tokens: TokenStream) -> TokenStream {
                 #(
                     #fields_writes
                 )*
-                w.write_all(b" ")?;
+
                 #(
                     #timestamp_writes
                 )*

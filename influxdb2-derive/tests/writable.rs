@@ -98,6 +98,37 @@ struct Item5 {
     time: u64,
 }
 
+#[derive(WriteDataPoint)]
+#[measurement = "allTagsNone"]
+struct Item6 {
+    #[influxdb(tag)]
+    tag1: Option<String>,
+    #[influxdb(tag)]
+    tag2: Option<String>,
+    #[influxdb(field)]
+    field1: String,
+    #[influxdb(timestamp)]
+    time: u64,
+}
+
+#[derive(WriteDataPoint)]
+#[measurement = "noTags"]
+struct Item7 {
+    #[influxdb(field)]
+    field1: String,
+    #[influxdb(timestamp)]
+    time: u64,
+}
+
+#[derive(WriteDataPoint)]
+#[measurement = "noTimestamp"]
+struct Item8 {
+    #[influxdb(tag)]
+    tag1: String,
+    #[influxdb(field)]
+    field1: String,
+}
+
 fn main() {
     use influxdb2::models::WriteDataPoint;
     use std::io::Write;
@@ -197,4 +228,47 @@ fn main() {
         b"foobar,tag3=thisIsATag field3=12.34 222222\n"
     );
 
+    let item = Item6 {
+    tag1: None,
+    tag2: None,
+    field1: "abc".to_string(),
+    time: 122222u64
+    };
+
+    let mut writer = Vec::new();
+    item.write_data_point_to(&mut writer).unwrap();
+    writer.flush().unwrap();
+    println!("Writer: {}", std::str::from_utf8(&writer).unwrap());
+    assert_eq!(
+        &writer[..],
+        b"allTagsNone field1=\"abc\" 122222\n"
+    );
+
+    let item = Item7 {
+        field1: "def".to_string(),
+        time: 122222u64,
+    };
+
+    let mut writer = Vec::new();
+    item.write_data_point_to(&mut writer).unwrap();
+    writer.flush().unwrap();
+    println!("Writer: {}", std::str::from_utf8(&writer).unwrap());
+    assert_eq!(
+        &writer[..],
+        b"noTags field1=\"def\" 122222\n"
+    );
+
+    let item = Item8 {
+        tag1: "abc".to_string(),
+        field1: "def".to_string(),
+    };
+
+    let mut writer = Vec::new();
+    item.write_data_point_to(&mut writer).unwrap();
+    writer.flush().unwrap();
+    println!("Writer: {}", std::str::from_utf8(&writer).unwrap());
+    assert_eq!(
+        &writer[..],
+        b"noTimestamp,tag1=abc field1=\"def\"\n"
+    );
 }
