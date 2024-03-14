@@ -11,6 +11,7 @@ Add this to `cargo.toml`:
 ```toml
 influxdb2 = "0.3"
 influxdb2-structmap = "0.2"
+influxdb2-derive = "0.1.1"
 num-traits = "0.2"
 ```
 
