@@ -58,6 +58,17 @@ impl Authorization {
     }
 }
 
+/// List of authorizations.
+#[derive(Clone, Debug, PartialEq, Default, Serialize, Deserialize)]
+pub struct Authorizations {
+    /// Links
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub links: Option<crate::models::Links>,
+    /// Authorizations
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub authorizations: Vec<crate::models::Authorization>,
+}
+
 /// If inactive the token is inactive and requests using the token will be
 /// rejected.
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
