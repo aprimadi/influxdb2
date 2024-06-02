@@ -136,3 +136,8 @@
 =====
 
 - Add `start` and `stop` optional parameters to schema query API (non-backwards compatible change)
+
+0.5.1
+=====
+
+- Implement authorizations listing and creation
