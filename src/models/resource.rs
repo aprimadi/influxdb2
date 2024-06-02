@@ -43,14 +43,38 @@ impl Resource {
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum Type {
+    /// Annotations
+    Annotations,
     /// Authorizations
     Authorizations,
     /// Buckets
     Buckets,
+    /// Checks
+    Checks,
     /// Dashboards
     Dashboards,
-    /// Organizations
+    /// Dbrp
+    Dbrp,
+    /// Documents
+    Documents,
+    /// Labels
+    Labels,
+    /// Notebooks
+    Notebooks,
+    /// Notification Endpoints
+    NotificationEndpoints,
+    /// Notification Rules
+    NotificationRules,
+    /// Orgs
     Orgs,
+    /// Remotes
+    Remotes,
+    /// Replications
+    Replications,
+    /// Scrapers
+    Scrapers,
+    /// Secrets
+    Secrets,
     /// Sources
     Sources,
     /// Tasks
@@ -61,22 +85,6 @@ pub enum Type {
     Users,
     /// Variables
     Variables,
-    /// Scrapers
-    Scrapers,
-    /// Secrets
-    Secrets,
-    /// Labels
-    Labels,
     /// Views
     Views,
-    /// Documents
-    Documents,
-    /// Notification Rules
-    NotificationRules,
-    /// Notification Endpoints
-    NotificationEndpoints,
-    /// Checks
-    Checks,
-    /// DBRP
-    Dbrp,
 }
