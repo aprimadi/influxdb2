@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use snafu::ResultExt;
 
 use crate::models::{Buckets, PostBucketRequest};
-use crate::{Client, Http, RequestError, ReqwestProcessing, Serializing};
+use crate::{Client, Http, RequestError, ReqwestProcessing};
 
 impl Client {
     /// List all buckets matching specified parameters
@@ -47,10 +47,7 @@ impl Client {
 
         let response = self
             .request(Method::POST, &create_bucket_url)
-            .body(
-                serde_json::to_string(&post_bucket_request.unwrap_or_default())
-                    .context(Serializing)?,
-            )
+            .json(&post_bucket_request.unwrap_or_default())
             .send()
             .await
             .context(ReqwestProcessing)?;
