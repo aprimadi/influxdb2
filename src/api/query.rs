@@ -220,7 +220,7 @@ impl Client {
         }
     }
 
-    /// Get Query AST Repsonse
+    /// Get Query AST Response
     pub async fn query_ast(
         &self,
         language_request: Option<LanguageRequest>,

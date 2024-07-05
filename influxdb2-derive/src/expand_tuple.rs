@@ -32,9 +32,9 @@ pub fn make_tuple_tags(tokens: TokenStream) -> TokenStream {
 
     let mut concate_str: Vec<TokenStream2> = Vec::new();
     let enumerate_generic = generic_idents.iter().enumerate().collect::<Vec<_>>();
-    let mut chuncks = enumerate_generic.as_slice().chunks(2).peekable();
+    let mut chunks = enumerate_generic.as_slice().chunks(2).peekable();
     loop {
-        match chuncks.next() {
+        match chunks.next() {
             Some(c) => {
                 let first_index: syn::Index = c[0].0.into();
                 let second_index: syn::Index = c[1].0.into();
@@ -42,7 +42,7 @@ pub fn make_tuple_tags(tokens: TokenStream) -> TokenStream {
                 concate_str.push(quote!(res.push_str("=")));
                 concate_str.push(quote!(res.push_str(&self.#second_index.encode_key())));
 
-                if chuncks.peek().is_some() {
+                if chunks.peek().is_some() {
                     concate_str.push(quote!(res.push_str(",")))
                 }
             }
@@ -75,9 +75,9 @@ pub fn make_tuple_fields(tokens: TokenStream) -> TokenStream {
 
     let mut concate_str: Vec<TokenStream2> = Vec::new();
     let enumerate_generic = generic_idents.iter().enumerate().collect::<Vec<_>>();
-    let mut chuncks = enumerate_generic.as_slice().chunks(2).peekable();
+    let mut chunks = enumerate_generic.as_slice().chunks(2).peekable();
     loop {
-        match chuncks.next() {
+        match chunks.next() {
             Some(c) => {
                 let first_index: syn::Index = c[0].0.into();
                 let second_index: syn::Index = c[1].0.into();
@@ -85,7 +85,7 @@ pub fn make_tuple_fields(tokens: TokenStream) -> TokenStream {
                 concate_str.push(quote!(res.push_str("=")));
                 concate_str.push(quote!(res.push_str(&self.#second_index.encode_value())));
 
-                if chuncks.peek().is_some() {
+                if chunks.peek().is_some() {
                     concate_str.push(quote!(res.push_str(",")))
                 }
             }
