@@ -1,6 +1,6 @@
 //! Onboarding/Setup
 //!
-//! Initate and start onboarding process of InfluxDB server.
+//! Initiate and start onboarding process of InfluxDB server.
 
 use crate::{Client, Http, RequestError, ReqwestProcessing, Serializing};
 use reqwest::{Method, StatusCode};

@@ -1,4 +1,4 @@
-//! Idendifier
+//! Identifier
 
 use serde::{Deserialize, Serialize};
 

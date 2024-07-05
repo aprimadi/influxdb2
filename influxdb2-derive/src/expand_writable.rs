@@ -12,12 +12,12 @@ pub fn impl_writeable(tokens: TokenStream) -> TokenStream {
     let ident = input.ident;
     let generics = input.generics;
     let measurement = input.attrs.into_iter().find_map(|a| {
-        let is_outter = match a.style {
+        let is_outer = match a.style {
             syn::AttrStyle::Outer => true,
             syn::AttrStyle::Inner(_) => false,
         };
         let is_measurement = a.path.is_ident("measurement");
-        if is_outter && is_measurement {
+        if is_outer && is_measurement {
             Some(a)
         } else {
             None

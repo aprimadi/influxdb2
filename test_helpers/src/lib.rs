@@ -126,7 +126,7 @@ pub fn maybe_start_logging() {
 /// Is a macro so test error
 /// messages are on the same line as the failure;
 ///
-/// Both arguments must be convertable into Strings (Into<String>)
+/// Both arguments must be convertible into Strings (Into<String>)
 macro_rules! assert_contains {
     ($ACTUAL: expr, $EXPECTED: expr) => {
         let actual_value: String = $ACTUAL.into();
@@ -145,7 +145,7 @@ macro_rules! assert_contains {
 /// a nice error message if that check fails. Is a macro so test error
 /// messages are on the same line as the failure;
 ///
-/// Both arguments must be convertable into Strings (Into<String>)
+/// Both arguments must be convertible into Strings (Into<String>)
 macro_rules! assert_not_contains {
     ($ACTUAL: expr, $UNEXPECTED: expr) => {
         let actual_value: String = $ACTUAL.into();

@@ -203,7 +203,7 @@ impl Client {
 /// Errors that occur when building the client
 #[derive(Debug, Snafu)]
 pub enum BuildError {
-    /// While constructing the reqwest client an error occured
+    /// While constructing the reqwest client an error occurred
     #[snafu(display("Error while building the client: {}", source))]
     ReqwestClientError {
         /// Reqwest internal error
