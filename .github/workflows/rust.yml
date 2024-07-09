@@ -22,7 +22,6 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    id: build
     needs: typos
     steps:
     - name: Clone this repository
@@ -55,7 +54,6 @@ jobs:
   test: 
     name: Run Tests
     runs-on: ubuntu-latest
-    id: test
     needs: build
     steps:
     - name: Clone this repository
