@@ -30,7 +30,7 @@ impl Client {
             return res;
         }
 
-        Ok(response.json().await.context(ReqwestProcessing)?)
+        response.json().await.context(ReqwestProcessing)
     }
 
     /// Create a new authorization in the organization.

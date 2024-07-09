@@ -22,6 +22,8 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    id: build
+    needs: typos
     steps:
     - name: Clone this repository
       uses: actions/checkout@v4
@@ -50,5 +52,20 @@ jobs:
     - name: Build
       run: cargo build --verbose
 
+  test: 
+    name: Run Tests
+    runs-on: ubuntu-latest
+    id: test
+    needs: build
+    steps:
+    - name: Clone this repository
+      uses: actions/checkout@v4
+    
+    - name: Rust Toolchain
+      uses: actions-rust-lang/setup-rust-toolchain@v1
+
+    - name: Update Stable Rust toolchain
+      run: rustup update stable
+
     - name: Run tests
-      run: cargo test --verbose
+      run: TEST_INTEGRATION=true cargo test --verbose

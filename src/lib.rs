@@ -250,7 +250,8 @@ impl ClientBuilder {
         };
 
         let url: String = url.into();
-        let base = Url::parse(&url).expect(&format!("Invalid url was provided: {}", &url));
+        let base =
+            Url::parse(&url).unwrap_or_else(|_| panic!("Invalid url was provided: {}", &url));
 
         Self {
             base,
