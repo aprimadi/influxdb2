@@ -56,15 +56,17 @@ pub fn impl_writeable(tokens: TokenStream) -> TokenStream {
                 let ident_str = ident.to_string();
                 let kind = f.kind.clone();
                 Some(quote! {
-                    w.write_all(format!("{}", #ident_str).as_bytes())?;
-                    w.write_all(b"=")?;
-                    w.write_all(<#kind as #writable_krate::KeyWritable>::encode_key(&self.#ident).into_bytes().as_slice())?;
+                    if <#kind as #writable_krate::KeyWritable>::encode_key(&self.#ident) != "None"{
+                        w.write_all(b",")?;
+                        w.write_all(format!("{}", #ident_str).as_bytes())?;
+                        w.write_all(b"=")?;
+                        w.write_all(<#kind as #writable_krate::KeyWritable>::encode_key(&self.#ident).into_bytes().as_slice())?;
+                    }
                 })
             }
             _ => None,
         })
         .collect();
-
     let fields_writes: Vec<TokenStream2> = fields
         .iter()
         .filter_map(|f| match f.field_type {
@@ -73,9 +75,15 @@ pub fn impl_writeable(tokens: TokenStream) -> TokenStream {
                 let ident_str = ident.to_string();
                 let kind = f.kind.clone();
                 Some(quote! {
-                    w.write_all(format!("{}", #ident_str).as_bytes())?;
-                    w.write_all(b"=")?;
-                    w.write_all(<#kind as #writable_krate::ValueWritable>::encode_value(&self.#ident).into_bytes().as_slice())?;
+                    if <#kind as #writable_krate::ValueWritable>::encode_value(&self.#ident) != "None" {
+                        if first_field_write == false {
+                            w.write_all(b",")?;
+                        }
+                        w.write_all(format!("{}", #ident_str).as_bytes())?;
+                        w.write_all(b"=")?;
+                        w.write_all(<#kind as #writable_krate::ValueWritable>::encode_value(&self.#ident).into_bytes().as_slice())?;
+                        first_field_write = false;
+                    }
                 })
             }
             _ => None,
@@ -89,6 +97,7 @@ pub fn impl_writeable(tokens: TokenStream) -> TokenStream {
                 let ident = f.ident.clone();
                 let kind = f.kind.clone();
                 Some(quote! {
+                    w.write_all(b" ")?;
                     w.write_all(<#kind as #writable_krate::TimestampWritable>::encode_timestamp(&self.#ident).into_bytes().as_slice())?;
                 })
             }
@@ -96,30 +105,11 @@ pub fn impl_writeable(tokens: TokenStream) -> TokenStream {
         })
         .collect();
 
-    if tag_writes.len() < 1 {
-        panic!("You have to specify at least one #[tag] field.")
-    }
-    if timestamp_writes.len() != 1 {
-        panic!("You have to specify at exact one #[timestamp] field.")
+    if timestamp_writes.len() > 1 {
+        panic!("You have to specify at most one #[timestamp] field.")
     }
     if fields_writes.len() < 1 {
         panic!("You have to specify at least one #[field] field.")
-    }
-
-    let mut combined_tag_writes = vec![];
-    for (index, tag_write) in tag_writes.iter().enumerate() {
-        if index > 0 {
-            combined_tag_writes.push(quote!(w.write_all(b",")?;));
-        }
-        combined_tag_writes.push(tag_write.clone());
-    }
-
-    let mut combined_fields_writes = vec![];
-    for (index, fields_write) in fields_writes.iter().enumerate() {
-        if index > 0 {
-            combined_fields_writes.push(quote!(w.write_all(b",")?;));
-        }
-        combined_fields_writes.push(fields_write.clone());
     }
 
     let output = quote! {
@@ -128,16 +118,17 @@ pub fn impl_writeable(tokens: TokenStream) -> TokenStream {
             fn write_data_point_to<W>(&self,mut w: W) -> std::io::Result<()>
             where
                 W: std::io::Write{
-                w.write_all(format!("{},", #measure).as_bytes())?;
+                w.write_all(format!("{}", #measure).as_bytes())?;
 
                 #(
-                    #combined_tag_writes
+                    #tag_writes
                 )*
                 w.write_all(b" ")?;
+                let mut first_field_write = true;
                 #(
-                    #combined_fields_writes
+                    #fields_writes
                 )*
-                w.write_all(b" ")?;
+
                 #(
                     #timestamp_writes
                 )*
