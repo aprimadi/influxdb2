@@ -15,7 +15,7 @@ pub struct File {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub package: Option<crate::models::ast::PackageClause>,
     /// A list of package imports
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[serde(default)]
     pub imports: Vec<crate::models::ast::ImportDeclaration>,
     /// List of Flux statements
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
