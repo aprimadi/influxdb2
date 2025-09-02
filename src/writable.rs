@@ -77,7 +77,7 @@ impl<T: ValueWritable> ValueWritable for Option<T> {
     fn encode_value(&self) -> String {
         match self {
             Some(v) => v.encode_value(),
-            None => "\"None\"".to_string(),
+            None => "None".to_string(),
         }
     }
 }
@@ -195,6 +195,18 @@ mod tests {
     fn value_writable_i64() {
         let a: i64 = 33;
         assert_eq!(a.encode_value(), "33i")
+    }
+
+    #[test]
+    fn value_writable_option_f64_not_none() {
+        let a: Option<f64> = Some(78.4);
+        assert_eq!(a.encode_value(), "78.4");
+    }
+
+    #[test]
+    fn value_writable_option_f64_none() {
+        let a: Option<f64> = None;
+        assert_eq!(a.encode_value(), "None");
     }
 
     #[test]
