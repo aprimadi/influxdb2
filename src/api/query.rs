@@ -712,7 +712,9 @@ fn parse_value(s: &str, t: DataType, name: &str) -> Result<Value, RequestError> 
     match t {
         DataType::String => Ok(Value::String(String::from(s))),
         DataType::Double => {
-            let v = s.parse::<f64>().unwrap();
+            let v = s.parse::<f64>().map_err(|e| RequestError::Deserializing {
+                text: e.to_string(),
+            })?;
             Ok(Value::Double(OrderedFloat::from(v)))
         }
         DataType::Bool => {
@@ -723,11 +725,15 @@ fn parse_value(s: &str, t: DataType, name: &str) -> Result<Value, RequestError> 
             }
         }
         DataType::Long => {
-            let v = s.parse::<i64>().unwrap();
+            let v = s.parse::<i64>().map_err(|e| RequestError::Deserializing {
+                text: e.to_string(),
+            })?;
             Ok(Value::Long(v))
         }
         DataType::UnsignedLong => {
-            let v = s.parse::<u64>().unwrap();
+            let v = s.parse::<u64>().map_err(|e| RequestError::Deserializing {
+                text: e.to_string(),
+            })?;
             Ok(Value::UnsignedLong(v))
         }
         DataType::Duration => match parse_duration(s) {
@@ -737,11 +743,15 @@ fn parse_value(s: &str, t: DataType, name: &str) -> Result<Value, RequestError> 
             }),
         },
         DataType::Base64Binary => {
-            let b = decode(s).unwrap();
+            let b = decode(s).map_err(|e| RequestError::Deserializing {
+                text: e.to_string(),
+            })?;
             Ok(Value::Base64Binary(b))
         }
         DataType::TimeRFC => {
-            let t = DateTime::parse_from_rfc3339(s).unwrap();
+            let t = DateTime::parse_from_rfc3339(s).map_err(|e| RequestError::Deserializing {
+                text: e.to_string(),
+            })?;
             Ok(Value::TimeRFC(t))
         }
     }
