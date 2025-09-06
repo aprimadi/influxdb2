@@ -51,13 +51,13 @@ impl ValueWritable for u64 {
 
 impl ValueWritable for String {
     fn encode_value(&self) -> String {
-        format!("\"{}\"", self)
+        format!("\"{}\"", self.replace("\\", "\\\\").replace("\"", "\\\""))
     }
 }
 
 impl ValueWritable for &str {
     fn encode_value(&self) -> String {
-        format!("\"{}\"", self)
+        format!("\"{}\"", self.replace("\\", "\\\\").replace("\"", "\\\""))
     }
 }
 
